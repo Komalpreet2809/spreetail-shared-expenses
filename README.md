@@ -5,9 +5,12 @@ Spreetail Software Engineering Intern assignment. The hard part — and the focu
 of this project — is **ingesting a deliberately messy CSV**: detecting every data
 problem, surfacing it, and handling it deliberately instead of silently.
 
-- **Live app:** _<add Vercel URL after deploy>_
-- **API:** _<add Render URL after deploy>_
+- **Live app:** https://spreetail-shared-expenses-omega.vercel.app
+- **API:** https://spreetail-expenses-api.onrender.com
 - **Demo login:** `demo` / `demo12345`
+
+> Note: the API runs on Render's free tier and **cold-starts (~50s) after
+> inactivity** — the first request after a quiet period is slow, then it's fast.
 
 > Built with an AI pair-programmer (Claude / Claude Code) directing it as the
 > engineer of record. See [AI_USAGE.md](./AI_USAGE.md), including three concrete
