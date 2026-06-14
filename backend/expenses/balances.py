@@ -15,6 +15,8 @@ net balances is always 0. We assert that as a safety net.
 
 from __future__ import annotations
 
+from collections import defaultdict
+
 from .models import Expense, Settlement
 from .money import to_major_str
 
@@ -119,6 +121,68 @@ def member_breakdown(group, member) -> dict:
         "owed": owed,
         "settlements": settled,
     }
+
+
+def group_stats(group) -> dict:
+    """Aggregate numbers that power the dashboard infographics: totals, spending
+    over time, top contributors, and split-type mix."""
+    base = group.base_currency
+    expenses = list(
+        Expense.objects.filter(group=group).select_related("paid_by"))
+    settlements = list(Settlement.objects.filter(group=group))
+
+    total = sum(e.amount_base_minor for e in expenses)
+    by_month_minor: dict[str, int] = defaultdict(int)
+    by_payer_minor: dict[str, int] = defaultdict(int)
+    by_type_count: dict[str, int] = defaultdict(int)
+
+    for e in expenses:
+        by_month_minor[e.date.strftime("%Y-%m")] += e.amount_base_minor
+        by_payer_minor[e.paid_by.name] += e.amount_base_minor
+        by_type_count[e.split_type] += 1
+
+    by_month = [
+        {"key": k, "label": _month_label(k),
+         "amount_minor": v, "amount": to_major_str(v)}
+        for k, v in sorted(by_month_minor.items())
+    ]
+    by_payer = [
+        {"name": n, "amount_minor": v, "amount": to_major_str(v)}
+        for n, v in sorted(by_payer_minor.items(), key=lambda x: x[1], reverse=True)
+    ]
+    by_split_type = [
+        {"type": t, "count": c}
+        for t, c in sorted(by_type_count.items(), key=lambda x: x[1], reverse=True)
+    ]
+
+    biggest = max(expenses, key=lambda e: e.amount_base_minor, default=None)
+    settled_total = sum(s.amount_base_minor for s in settlements)
+    count = len(expenses)
+
+    return {
+        "currency": base,
+        "total_spent_minor": total,
+        "total_spent": to_major_str(total),
+        "expense_count": count,
+        "member_count": group.members.count(),
+        "settlement_count": len(settlements),
+        "settled_total": to_major_str(settled_total),
+        "avg_expense": to_major_str(total // count if count else 0),
+        "by_month": by_month,
+        "by_payer": by_payer,
+        "by_split_type": by_split_type,
+        "biggest": (
+            {"description": biggest.description, "amount": to_major_str(biggest.amount_base_minor),
+             "date": biggest.date.isoformat(), "paid_by": biggest.paid_by.name}
+            if biggest else None
+        ),
+    }
+
+
+def _month_label(key: str) -> str:
+    import datetime
+    y, m = key.split("-")
+    return datetime.date(int(y), int(m), 1).strftime("%b %Y")
 
 
 def group_balances(group) -> dict:

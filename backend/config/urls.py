@@ -7,7 +7,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from accounts.views import MeView, RegisterView
 from aiquery.views import AskView
 from expenses.views import (
-    ExpenseViewSet, GroupBalancesView, MemberBreakdownView, SettlementViewSet,
+    ExpenseViewSet, GroupBalancesView, GroupStatsView, MemberBreakdownView,
+    SettlementViewSet,
 )
 from groups.views import GroupViewSet, MemberViewSet
 from importer.views import (
@@ -38,6 +39,7 @@ api_patterns = [
 
     # balances + drill-down
     path("groups/<int:group_id>/balances", GroupBalancesView.as_view()),
+    path("groups/<int:group_id>/stats", GroupStatsView.as_view()),
     path("groups/<int:group_id>/members/<int:member_id>/breakdown",
          MemberBreakdownView.as_view()),
 

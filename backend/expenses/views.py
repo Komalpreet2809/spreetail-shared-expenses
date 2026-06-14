@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from groups.models import Group, Member
-from .balances import group_balances, member_breakdown
+from .balances import group_balances, group_stats, member_breakdown
 from .models import Expense, Settlement
 from .serializers import (
     ExpenseCreateSerializer, ExpenseReadSerializer, SettlementSerializer,
@@ -40,6 +40,14 @@ class GroupBalancesView(APIView):
     def get(self, request, group_id):
         group = get_object_or_404(Group, id=group_id, owner=request.user)
         return Response(group_balances(group))
+
+
+class GroupStatsView(APIView):
+    """GET /api/groups/<id>/stats — aggregates for the dashboard infographics."""
+
+    def get(self, request, group_id):
+        group = get_object_or_404(Group, id=group_id, owner=request.user)
+        return Response(group_stats(group))
 
 
 class MemberBreakdownView(APIView):
