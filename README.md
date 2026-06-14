@@ -1,4 +1,4 @@
-# Splitmate — Shared Expenses App
+# BrokeTogether — Shared Expenses App
 
 A Splitwise-style shared-expenses app for a flatmate group, built for the
 Spreetail Software Engineering Intern assignment. The hard part — and the focus

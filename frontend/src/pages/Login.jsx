@@ -31,7 +31,7 @@ export default function Login() {
     <div className="center">
       <div className="card auth">
         <div className="brand" style={{ fontSize: 22, marginBottom: 4 }}>
-          Split<span>mate</span>
+          Broke<span>Together</span>
         </div>
         <div className="muted small" style={{ marginBottom: 14 }}>
           Shared expenses for flatmates · Spreetail assignment

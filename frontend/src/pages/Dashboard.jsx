@@ -37,7 +37,7 @@ export default function Dashboard() {
   return (
     <>
       <div className="appbar">
-        <div className="brand">Split<span>mate</span></div>
+        <div className="brand">Broke<span>Together</span></div>
         <div className="row">
           {groups.length > 0 && (
             <select
