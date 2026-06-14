@@ -26,6 +26,7 @@ def report_data(batch) -> dict:
     rows = []
     for row in batch.rows.all():
         rows.append({
+            "id": row.id,
             "row_number": row.row_number,
             "proposed_action": row.proposed_action,
             "action_label": ACTION_LABELS.get(row.proposed_action, row.proposed_action),
