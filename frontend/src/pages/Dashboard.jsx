@@ -17,7 +17,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-  ChevronDown, LogOut, Plus, LayoutDashboard, Receipt, Users, Upload, Bot, Sun, Moon,
+  ChevronDown, LogOut, Plus, LayoutDashboard, Receipt, Users, Upload, Bot, Sun, Moon, Loader2,
 } from "lucide-react";
 
 const TABS = [
@@ -38,6 +38,7 @@ export default function Dashboard() {
   const [showNewGroupModal, setShowNewGroupModal] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
   const [creatingGroup, setCreatingGroup] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [darkMode, setDarkMode] = useState(() => {
     const stored = localStorage.getItem("theme");
@@ -55,9 +56,16 @@ export default function Dashboard() {
   }, [darkMode]);
 
   async function loadGroups() {
-    const { data } = await api.get("/groups/");
-    setGroups(data);
-    if (data.length && !groupId) setGroupId(data[0].id);
+    try {
+      setLoading(true);
+      const { data } = await api.get("/groups/");
+      setGroups(data);
+      if (data.length && !groupId) setGroupId(data[0].id);
+    } catch (err) {
+      console.error("Failed to load groups:", err);
+    } finally {
+      setLoading(false);
+    }
   }
   useEffect(() => { loadGroups(); }, []);
 
@@ -80,6 +88,26 @@ export default function Dashboard() {
     } finally {
       setCreatingGroup(false);
     }
+  }
+
+  if (loading) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-[radial-gradient(900px_500px_at_50%_-10%,rgba(255,255,255,0.05),transparent_70%)]">
+        <div className="flex flex-col items-center gap-4 text-center max-w-xs px-4">
+          <div className="relative flex items-center justify-center">
+            {/* Outer glowing ring */}
+            <div className="absolute inset-0 rounded-full bg-primary/10 blur-xl w-12 h-12 animate-pulse" />
+            <Loader2 className="h-10 w-10 animate-spin text-primary relative z-10" />
+          </div>
+          <div className="space-y-1.5 mt-2">
+            <h3 className="font-bold text-foreground text-base tracking-tight">Waking up server</h3>
+            <p className="text-xs text-muted-foreground leading-normal">
+              Our free-tier server takes about 50 seconds to boot on first request. Thanks for waiting!
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
