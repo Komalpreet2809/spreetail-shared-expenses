@@ -420,8 +420,7 @@ export default function Balances({ groupId, group }) {
               {/* Floating Selection Details */}
               {selectedNode !== null && (
                 <div className="absolute top-2 right-2 flex items-center gap-2 bg-card/90 backdrop-blur border border-border px-3 py-1.5 rounded-xl shadow-md z-10 animate-fadeIn">
-                  <Initial name={group.members.find(m => m.id === selectedNode)?.name} size={18} />
-                  <span className="text-xs font-extrabold text-foreground">
+                  <span className="text-xs font-extrabold text-foreground pl-1">
                     {group.members.find(m => m.id === selectedNode)?.name}
                   </span>
                   <Button
@@ -549,12 +548,10 @@ export default function Balances({ groupId, group }) {
             <div className="grid gap-2 sm:grid-cols-2">
               {bal.settle_up.map((s, i) => (
                 <div key={i} className="flex items-center gap-2 rounded-xl border border-border bg-muted/20 p-3.5 transition-all hover:scale-101 hover:shadow-sm">
-                  <Initial name={s.from} size={26} />
-                  <span className="text-sm font-semibold">{s.from}</span>
+                  <span className="text-sm font-bold text-foreground pl-1">{s.from}</span>
                   <span className="text-xs text-muted-foreground px-1">pays</span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  <Initial name={s.to} size={26} />
-                  <span className="text-sm font-semibold">{s.to}</span>
+                  <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                  <span className="text-sm font-bold text-foreground pl-1">{s.to}</span>
                   <span className="ml-auto text-sm font-extrabold text-foreground bg-secondary/80 px-2.5 py-1 rounded-lg tabular-nums border border-border">
                     {money(s.amount, cur)}
                   </span>
@@ -708,9 +705,9 @@ export default function Balances({ groupId, group }) {
 
                 return (
                   <div key={m.id} className="grid grid-cols-5 items-center gap-4 pb-5 border-b border-border/10 last:border-b-0 last:pb-2 pt-2">
-                    <span className="text-xs font-semibold col-span-1 truncate flex items-center gap-1.5">
-                      <Initial name={m.name} size={18} /> {m.name}
-                      {m.is_guest && <span className="text-[8px] text-muted-foreground border border-border px-1 rounded-sm uppercase">guest</span>}
+                    <span className="text-xs font-bold col-span-1 truncate flex items-center gap-1.5 pl-1 text-foreground">
+                      {m.name}
+                      {m.is_guest && <span className="text-[8px] text-muted-foreground border border-border px-1 rounded-sm uppercase font-normal">guest</span>}
                     </span>
                     <div className="col-span-4 relative h-6 bg-muted/20 rounded-md flex items-center">
                       {/* Dotted background for inactive */}
