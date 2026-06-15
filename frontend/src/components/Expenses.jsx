@@ -195,9 +195,26 @@ export default function Expenses({ group, onChange }) {
           </div>
 
           {/* Quick Keyword Pills (Monochrome Style) */}
-          <div className="flex flex-wrap items-center gap-2 text-xs border-t border-border/10 pt-3 w-full">
-            <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground shrink-0">Tags</span>
-            <div className="flex flex-wrap gap-1.5 flex-1">
+          <div className="flex flex-col gap-2.5 text-xs border-t border-border/10 pt-3 w-full sm:flex-row sm:items-center sm:gap-3">
+            <div className="flex items-center justify-between sm:justify-start w-full sm:w-auto shrink-0">
+              <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground">Tags</span>
+              {/* Clear filters on mobile only */}
+              {(search || payer !== "all" || tag !== "all") && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("");
+                    setPayer("all");
+                    setTag("all");
+                  }}
+                  className="text-xs text-muted-foreground hover:text-foreground font-semibold underline underline-offset-2 cursor-pointer sm:hidden"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1.5 flex-1">
               {[
                 { id: "all", label: "All" },
                 { id: "grocery", label: "Grocery" },
@@ -224,6 +241,7 @@ export default function Expenses({ group, onChange }) {
               })}
             </div>
 
+            {/* Clear filters on desktop only */}
             {(search || payer !== "all" || tag !== "all") && (
               <button
                 type="button"
@@ -232,7 +250,7 @@ export default function Expenses({ group, onChange }) {
                   setPayer("all");
                   setTag("all");
                 }}
-                className="text-xs text-muted-foreground hover:text-foreground font-semibold underline underline-offset-2 ml-auto cursor-pointer shrink-0"
+                className="text-xs text-muted-foreground hover:text-foreground font-semibold underline underline-offset-2 ml-auto cursor-pointer shrink-0 hidden sm:block"
               >
                 Clear filters
               </button>
