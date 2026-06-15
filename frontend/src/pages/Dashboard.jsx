@@ -13,6 +13,9 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   ChevronDown, LogOut, Plus, LayoutDashboard, Receipt, Users, Upload, Bot, Sun, Moon,
 } from "lucide-react";
@@ -32,6 +35,10 @@ export default function Dashboard() {
   const [refreshKey, setRefreshKey] = useState(0);
   const [showBrokie, setShowBrokie] = useState(false);
   
+  const [showNewGroupModal, setShowNewGroupModal] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
+  const [creatingGroup, setCreatingGroup] = useState(false);
+
   const [darkMode, setDarkMode] = useState(() => {
     const stored = localStorage.getItem("theme");
     return stored ? stored === "dark" : true; // default to dark mode
@@ -57,12 +64,22 @@ export default function Dashboard() {
   const group = groups.find((g) => g.id === groupId);
   const bump = () => setRefreshKey((k) => k + 1);
 
-  async function createGroup() {
-    const name = prompt("New group name?");
+  async function handleCreateGroup(e) {
+    if (e) e.preventDefault();
+    const name = newGroupName.trim();
     if (!name) return;
-    const { data } = await api.post("/groups/", { name, base_currency: "INR" });
-    await loadGroups();
-    setGroupId(data.id);
+    setCreatingGroup(true);
+    try {
+      const { data } = await api.post("/groups/", { name, base_currency: "INR" });
+      await loadGroups();
+      setGroupId(data.id);
+      setShowNewGroupModal(false);
+      setNewGroupName("");
+    } catch (err) {
+      alert("Failed to create group. Please try again.");
+    } finally {
+      setCreatingGroup(false);
+    }
   }
 
   return (
@@ -103,7 +120,7 @@ export default function Dashboard() {
             
             <DropdownMenuSeparator className="my-1.5" />
             
-            <DropdownMenuItem onClick={createGroup} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm cursor-pointer hover:bg-muted focus:bg-muted transition-colors">
+            <DropdownMenuItem onClick={() => { setNewGroupName(""); setShowNewGroupModal(true); }} className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm cursor-pointer hover:bg-muted focus:bg-muted transition-colors">
               <Plus className="h-4 w-4 text-muted-foreground" />
               <span className="font-medium">New group</span>
             </DropdownMenuItem>
@@ -126,7 +143,7 @@ export default function Dashboard() {
         {!group ? (
           <div className="rounded-xl border border-border bg-card p-6">
             <p className="mb-4">No groups yet.</p>
-            <Button onClick={createGroup}>Create your first group</Button>
+            <Button onClick={() => { setNewGroupName(""); setShowNewGroupModal(true); }}>Create your first group</Button>
           </div>
         ) : (
           <>
@@ -163,7 +180,7 @@ export default function Dashboard() {
                   })}
                   <DropdownMenuSeparator className="my-1.5" />
                   <DropdownMenuItem 
-                    onClick={createGroup}
+                    onClick={() => { setNewGroupName(""); setShowNewGroupModal(true); }}
                     className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-semibold text-foreground cursor-pointer hover:bg-muted focus:bg-muted transition-colors"
                   >
                     <Plus className="h-4 w-4 text-muted-foreground" />
@@ -237,6 +254,47 @@ export default function Dashboard() {
           </>
         )}
       </main>
+
+      <Dialog open={showNewGroupModal} onOpenChange={setShowNewGroupModal}>
+        <DialogContent className="max-w-md p-6 rounded-2xl border border-border bg-card shadow-lg">
+          <DialogHeader className="mb-4">
+            <DialogTitle className="text-lg font-bold">Create New Group</DialogTitle>
+            <p className="text-xs text-muted-foreground mt-1">Set up a new shared expense space.</p>
+          </DialogHeader>
+          <form onSubmit={handleCreateGroup} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="groupName" className="text-xs font-semibold">Group Name</Label>
+              <Input
+                id="groupName"
+                placeholder="e.g. Goa Trip 2026, Flat 4B"
+                value={newGroupName}
+                onChange={(e) => setNewGroupName(e.target.value)}
+                autoFocus
+                disabled={creatingGroup}
+                className="w-full text-sm bg-muted/20 border-border"
+              />
+            </div>
+            <div className="flex items-center justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="ghost"
+                disabled={creatingGroup}
+                onClick={() => setShowNewGroupModal(false)}
+                className="text-xs font-medium cursor-pointer"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={creatingGroup || !newGroupName.trim()}
+                className="text-xs font-semibold shadow-sm cursor-pointer"
+              >
+                {creatingGroup ? "Creating..." : "Create Group"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
