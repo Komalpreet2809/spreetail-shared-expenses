@@ -252,162 +252,191 @@ export default function Balances({ groupId, group }) {
               An interactive network of group debts. Hover over a person to highlight their debts.
             </p>
           </CardHeader>
-          <CardContent className="flex items-center justify-center p-4 min-h-[350px] relative">
-            <svg
-              viewBox="0 0 400 400"
-              className={`w-full max-w-[340px] h-auto overflow-visible select-none ${
-                draggedNode !== null ? "cursor-grabbing" : "cursor-grab"
-              }`}
-              onClick={() => setSelectedNode(null)}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleDragEnd}
-              onMouseLeave={handleDragEnd}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleDragEnd}
-            >
-              <defs>
-                <marker id="arrow" viewBox="0 0 10 10" refX="21" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--muted-foreground)" />
-                </marker>
-                <marker id="arrow-active-out" viewBox="0 0 10 10" refX="21" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--neg)" />
-                </marker>
-                <marker id="arrow-active-in" viewBox="0 0 10 10" refX="21" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                  <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--pos)" />
-                </marker>
-              </defs>
-              
-              <g transform={`scale(${zoom})`} style={{ transformOrigin: "200px 200px", transition: "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)" }}>
-              {/* Edge lines */}
-              {graphEdges.map((e) => {
-                const isHighlightActive = activeHighlightNode !== null;
-                const isFromHighlight = activeHighlightNode === e.fromNode.id;
-                const isToHighlight = activeHighlightNode === e.toNode.id;
+          <CardContent className="relative flex items-center justify-center p-4 min-h-[350px]">
+            <div className="relative w-full max-w-[340px]">
+              <svg
+                viewBox="0 0 400 400"
+                className={`w-full h-auto overflow-visible select-none ${
+                  draggedNode !== null ? "cursor-grabbing" : "cursor-grab"
+                }`}
+                onClick={() => setSelectedNode(null)}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleDragEnd}
+                onMouseLeave={handleDragEnd}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleDragEnd}
+              >
+                <defs>
+                  <marker id="arrow" viewBox="0 0 10 10" refX="21" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--muted-foreground)" />
+                  </marker>
+                  <marker id="arrow-active-out" viewBox="0 0 10 10" refX="21" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--neg)" />
+                  </marker>
+                  <marker id="arrow-active-in" viewBox="0 0 10 10" refX="21" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                    <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--pos)" />
+                  </marker>
+                </defs>
                 
-                let strokeColor = "var(--border)";
-                let strokeWidth = 1.5;
-                let active = false;
-                let marker = "url(#arrow)";
-                let opacity = 1;
-
-                if (isHighlightActive) {
-                  if (isFromHighlight) {
-                    strokeColor = "var(--neg)";
-                    strokeWidth = 3;
-                    active = true;
-                    marker = "url(#arrow-active-out)";
-                  } else if (isToHighlight) {
-                    strokeColor = "var(--pos)";
-                    strokeWidth = 3;
-                    active = true;
-                    marker = "url(#arrow-active-in)";
-                  } else {
-                    opacity = 0.15;
+                <g transform={`scale(${zoom})`} style={{ transformOrigin: "200px 200px", transition: "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)" }}>
+                {/* Edge lines */}
+                {graphEdges.map((e) => {
+                  const isHighlightActive = activeHighlightNode !== null;
+                  const isFromHighlight = activeHighlightNode === e.fromNode.id;
+                  const isToHighlight = activeHighlightNode === e.toNode.id;
+                  
+                  let strokeColor = "var(--border)";
+                  let strokeWidth = 1.5;
+                  let active = false;
+                  let marker = "url(#arrow)";
+                  let opacity = 1;
+  
+                  if (isHighlightActive) {
+                    if (isFromHighlight) {
+                      strokeColor = "var(--neg)";
+                      strokeWidth = 3;
+                      active = true;
+                      marker = "url(#arrow-active-out)";
+                    } else if (isToHighlight) {
+                      strokeColor = "var(--pos)";
+                      strokeWidth = 3;
+                      active = true;
+                      marker = "url(#arrow-active-in)";
+                    } else {
+                      opacity = 0.15;
+                    }
                   }
-                }
-
-                return (
-                  <g key={e.id} className="transition-opacity duration-300" style={{ opacity }}>
-                    <path
-                      d={`M ${e.fromNode.x} ${e.fromNode.y} L ${e.toNode.x} ${e.toNode.y}`}
-                      stroke={strokeColor}
-                      strokeWidth={strokeWidth}
-                      fill="none"
-                      markerEnd={marker}
-                      className={active ? "flow-line" : ""}
-                    />
-                    
-                    {/* Animated moving dot for active flow */}
-                    {active && (
-                      <circle r="4.5" fill={isFromHighlight ? "var(--neg)" : "var(--pos)"}>
-                        <animateMotion dur="2.5s" repeatCount="indefinite" path={`M ${e.fromNode.x} ${e.fromNode.y} L ${e.toNode.x} ${e.toNode.y}`} />
-                      </circle>
-                    )}
-
-                    {/* Midpoint value label */}
-                    <g transform={`translate(${(e.fromNode.x + e.toNode.x) / 2}, ${(e.fromNode.y + e.toNode.y) / 2})`}>
-                      <rect
-                        x="-24" y="-9" width="48" height="18" rx="4"
-                        fill="var(--card)" stroke="var(--border)" strokeWidth="1"
+  
+                  return (
+                    <g key={e.id} className="transition-opacity duration-300" style={{ opacity }}>
+                      <path
+                        d={`M ${e.fromNode.x} ${e.fromNode.y} L ${e.toNode.x} ${e.toNode.y}`}
+                        stroke={strokeColor}
+                        strokeWidth={strokeWidth}
+                        fill="none"
+                        markerEnd={marker}
+                        className={active ? "flow-line" : ""}
                       />
-                      <text
-                        textAnchor="middle" y="4" fontSize="9" fontWeight="bold"
-                        className="fill-foreground font-sans tabular-nums"
-                      >
-                        {money(e.amount, cur)}
+                      
+                      {/* Animated moving dot for active flow */}
+                      {active && (
+                        <circle r="4.5" fill={isFromHighlight ? "var(--neg)" : "var(--pos)"}>
+                          <animateMotion dur="2.5s" repeatCount="indefinite" path={`M ${e.fromNode.x} ${e.fromNode.y} L ${e.toNode.x} ${e.toNode.y}`} />
+                        </circle>
+                      )}
+  
+                      {/* Midpoint value label */}
+                      <g transform={`translate(${(e.fromNode.x + e.toNode.x) / 2}, ${(e.fromNode.y + e.toNode.y) / 2})`}>
+                        <rect
+                          x="-24" y="-9" width="48" height="18" rx="4"
+                          fill="var(--card)" stroke="var(--border)" strokeWidth="1"
+                        />
+                        <text
+                          textAnchor="middle" y="4" fontSize="9" fontWeight="bold"
+                          className="fill-foreground font-sans tabular-nums"
+                        >
+                          {money(e.amount, cur)}
+                        </text>
+                      </g>
+                    </g>
+                  );
+                })}
+  
+                {/* Node Circles */}
+                {graphNodes.map((n) => {
+                  const isHighlightActive = activeHighlightNode !== null;
+                  const isSelf = activeHighlightNode === n.id;
+                  const isConnected = connectedNodeIds.has(n.id);
+                  
+                  let opacity = 1;
+                  let scale = 1;
+                  let strokeColor = "var(--primary)";
+                  let strokeWidth = 2.5;
+  
+                  if (isHighlightActive) {
+                    if (isSelf) {
+                      scale = 1.15;
+                      strokeColor = "var(--primary)";
+                      strokeWidth = 3.5;
+                    } else if (isConnected) {
+                      scale = 1.05;
+                      strokeColor = "var(--foreground)";
+                      strokeWidth = 2.5;
+                    } else {
+                      opacity = 0.15;
+                    }
+                  }
+  
+                  return (
+                    <g
+                      key={n.id}
+                      className="cursor-grab active:cursor-grabbing transition-all duration-150"
+                      style={{ opacity, transformOrigin: `${n.x}px ${n.y}px`, transform: `scale(${scale})` }}
+                      onMouseEnter={() => setHoveredNode(n.id)}
+                      onMouseLeave={() => setHoveredNode(null)}
+                      onMouseDown={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        setDragStart({ x: e.clientX, y: e.clientY });
+                        setHasDragged(false);
+                        setDraggedNode(n.id);
+                      }}
+                      onTouchStart={(e) => {
+                        e.stopPropagation();
+                        if (e.touches.length > 0) {
+                          setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+                        }
+                        setHasDragged(false);
+                        setDraggedNode(n.id);
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (hasDragged) return;
+                        setSelectedNode(prev => prev === n.id ? null : n.id);
+                      }}
+                    >
+                      <circle cx={n.x} cy={n.y} r="18" fill="var(--card)" stroke="var(--primary)" strokeWidth="2.5" className="shadow-sm" />
+                      <text textAnchor="middle" x={n.x} y={n.y + 4.5} fontSize="11" fontWeight="bold" className="fill-foreground font-sans uppercase">
+                        {n.name[0]}
+                      </text>
+                      <rect x={n.x - 30} y={n.y + 24} width="60" height="15" rx="3" fill="var(--card)" stroke="var(--border)" strokeWidth="0.5" />
+                      <text textAnchor="middle" x={n.x} y={n.y + 34} fontSize="9" fontWeight="500" className="fill-muted-foreground font-sans">
+                        {n.name}
                       </text>
                     </g>
-                  </g>
-                );
-              })}
-
-              {/* Node Circles */}
-              {graphNodes.map((n) => {
-                const isHighlightActive = activeHighlightNode !== null;
-                const isSelf = activeHighlightNode === n.id;
-                const isConnected = connectedNodeIds.has(n.id);
-                
-                let opacity = 1;
-                let scale = 1;
-                let strokeColor = "var(--primary)";
-                let strokeWidth = 2.5;
-
-                if (isHighlightActive) {
-                  if (isSelf) {
-                    scale = 1.15;
-                    strokeColor = "var(--primary)";
-                    strokeWidth = 3.5;
-                  } else if (isConnected) {
-                    scale = 1.05;
-                    strokeColor = "var(--foreground)";
-                    strokeWidth = 2.5;
-                  } else {
-                    opacity = 0.15;
-                  }
-                }
-
-                return (
-                  <g
-                    key={n.id}
-                    className="cursor-grab active:cursor-grabbing transition-all duration-150"
-                    style={{ opacity, transformOrigin: `${n.x}px ${n.y}px`, transform: `scale(${scale})` }}
-                    onMouseEnter={() => setHoveredNode(n.id)}
-                    onMouseLeave={() => setHoveredNode(null)}
-                    onMouseDown={(e) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      setDragStart({ x: e.clientX, y: e.clientY });
-                      setHasDragged(false);
-                      setDraggedNode(n.id);
-                    }}
-                    onTouchStart={(e) => {
-                      e.stopPropagation();
-                      if (e.touches.length > 0) {
-                        setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
-                      }
-                      setHasDragged(false);
-                      setDraggedNode(n.id);
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (hasDragged) return;
-                      setSelectedNode(prev => prev === n.id ? null : n.id);
+                  );
+                })}
+                </g>
+              </svg>
+  
+              {/* Floating Selection Details */}
+              {selectedNode !== null && (
+                <div className="absolute top-2 right-2 flex items-center gap-2 bg-card/90 backdrop-blur border border-border px-3 py-1.5 rounded-xl shadow-md z-10 animate-fadeIn">
+                  <Initial name={group.members.find(m => m.id === selectedNode)?.name} size={18} />
+                  <span className="text-xs font-extrabold text-foreground">
+                    {group.members.find(m => m.id === selectedNode)?.name}
+                  </span>
+                  <Button
+                    size="xs"
+                    className="h-6 text-[10px] px-2.5 font-bold cursor-pointer rounded-md shadow-sm ml-1"
+                    onClick={() => {
+                      const b = bal.balances.find(x => x.member_id === selectedNode);
+                      if (b) openDrill(b);
                     }}
                   >
-                    <circle cx={n.x} cy={n.y} r="18" fill="var(--card)" stroke="var(--primary)" strokeWidth="2.5" className="shadow-sm" />
-                    <text textAnchor="middle" x={n.x} y={n.y + 4.5} fontSize="11" fontWeight="bold" className="fill-foreground font-sans uppercase">
-                      {n.name[0]}
-                    </text>
-                    <rect x={n.x - 30} y={n.y + 24} width="60" height="15" rx="3" fill="var(--card)" stroke="var(--border)" strokeWidth="0.5" />
-                    <text textAnchor="middle" x={n.x} y={n.y + 34} fontSize="9" fontWeight="500" className="fill-muted-foreground font-sans">
-                      {n.name}
-                    </text>
-                  </g>
-                );
-              })}
-              </g>
-            </svg>
-            
+                    View Receipt
+                  </Button>
+                  <button
+                    type="button"
+                    className="h-6 w-6 p-0 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+                    onClick={() => setSelectedNode(null)}
+                  >
+                    ✕
+                  </button>
+                </div>
+              )}
+            </div>
+  
             {/* Floating Zoom Controls */}
             <div className="absolute bottom-4 right-4 flex flex-col gap-1 bg-card/85 backdrop-blur border border-border p-1.5 rounded-xl shadow-sm z-10">
               <Button
@@ -438,33 +467,6 @@ export default function Balances({ groupId, group }) {
                 <RotateCcw className="h-4 w-4" />
               </Button>
             </div>
-
-            {/* Floating Selection Details */}
-            {selectedNode !== null && (
-              <div className="absolute top-4 right-4 flex items-center gap-2 bg-card/90 backdrop-blur border border-border px-3 py-1.5 rounded-xl shadow-md z-10 animate-fadeIn">
-                <Initial name={group.members.find(m => m.id === selectedNode)?.name} size={18} />
-                <span className="text-xs font-extrabold text-foreground">
-                  {group.members.find(m => m.id === selectedNode)?.name}
-                </span>
-                <Button
-                  size="xs"
-                  className="h-6 text-[10px] px-2.5 font-bold cursor-pointer rounded-md shadow-sm ml-1"
-                  onClick={() => {
-                    const b = bal.balances.find(x => x.member_id === selectedNode);
-                    if (b) openDrill(b);
-                  }}
-                >
-                  View Receipt
-                </Button>
-                <button
-                  type="button"
-                  className="h-6 w-6 p-0 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
-                  onClick={() => setSelectedNode(null)}
-                >
-                  ✕
-                </button>
-              </div>
-            )}
           </CardContent>
         </Card>
 
