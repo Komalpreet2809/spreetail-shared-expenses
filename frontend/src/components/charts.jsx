@@ -75,16 +75,16 @@ export function HBar({ name, valueLabel, pct }) {
 export function ColumnChart({ data, currency }) {
   const max = Math.max(...data.map((d) => d.amount_minor), 1);
   return (
-    <div className="flex items-end gap-3 pt-2" style={{ height: 200 }}>
+    <div className="flex items-stretch gap-3 pt-2" style={{ height: 220 }}>
       {data.map((d) => (
-        <div key={d.key} className="flex flex-1 flex-col items-center gap-2">
+        <div key={d.key} className="flex h-full flex-1 flex-col items-center gap-2">
           <div className="text-xs font-semibold tabular-nums text-muted-foreground">
             {money(d.amount, currency)}
           </div>
-          <div className="flex w-full flex-1 items-end justify-center">
+          <div className="flex w-full min-h-0 flex-1 items-end justify-center">
             <div
-              className="w-full max-w-[56px] rounded-t-md bg-gradient-to-t from-muted-foreground/40 to-foreground transition-all"
-              style={{ height: `${(d.amount_minor / max) * 100}%` }}
+              className="w-full max-w-[56px] rounded-t-md bg-gradient-to-t from-muted-foreground/30 to-foreground transition-all"
+              style={{ height: `${Math.max((d.amount_minor / max) * 100, 1)}%` }}
             />
           </div>
           <div className="text-xs text-muted-foreground">{d.label}</div>
