@@ -324,12 +324,12 @@ export default function Ask({ groupId }) {
                     </div>
                     <div>
                       <span className="text-muted-foreground block text-[9px]">Total Members</span>
-                      <span className="font-bold">{activeFacts.balances?.length || 0}</span>
+                      <span className="font-bold">{activeFacts.net_balances?.length || 0}</span>
                     </div>
                   </div>
 
                   {/* Balances Audit Trail Table */}
-                  {activeFacts.balances && (
+                  {activeFacts.net_balances && (
                     <div className="space-y-1.5">
                       <div className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1">
                         <ListFilter className="h-3 w-3" /> Group Balances Array
@@ -343,15 +343,15 @@ export default function Ask({ groupId }) {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {activeFacts.balances.map((b, idx) => {
-                              const isOwed = b.net_minor > 0;
+                            {activeFacts.net_balances.map((b, idx) => {
+                              const isOwed = b.status === "is owed" || Number(b.net) > 0;
                               return (
                                 <TableRow key={idx} className="h-7 hover:bg-muted/10">
                                   <TableCell className="py-1 h-7 font-bold font-mono text-[10px]">{b.name}</TableCell>
                                   <TableCell className={`py-1 h-7 text-right font-mono text-[10px] font-semibold ${
                                     isOwed ? "text-pos" : "text-neg"
                                   }`}>
-                                    {isOwed ? "+" : ""}{(b.net_minor / 100).toFixed(2)}
+                                    {isOwed ? "+" : ""}{b.net}
                                   </TableCell>
                                 </TableRow>
                               );
@@ -363,25 +363,25 @@ export default function Ask({ groupId }) {
                   )}
 
                   {/* Settle Up Directives */}
-                  {activeFacts.settle_up && (
+                  {activeFacts.who_pays_whom && (
                     <div className="space-y-1.5">
                       <div className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1">
                         <Cpu className="h-3 w-3" /> Simplified Settle Up
                       </div>
                       <div className="space-y-1">
-                        {activeFacts.settle_up.length === 0 ? (
+                        {activeFacts.who_pays_whom.length === 0 ? (
                           <div className="text-[10px] text-muted-foreground italic p-2 border border-dashed rounded-lg text-center">
                             Everyone fully cleared.
                           </div>
                         ) : (
-                          activeFacts.settle_up.map((s, idx) => (
+                          activeFacts.who_pays_whom.map((s, idx) => (
                             <div key={idx} className="flex justify-between items-center p-2 rounded-lg border border-border/40 bg-muted/10 font-mono text-[10px]">
                               <div>
                                 <span className="font-bold">{s.from}</span>
                                 <span className="text-[9px] text-muted-foreground px-1.5">pays</span>
                                 <span className="font-bold">{s.to}</span>
                               </div>
-                              <span className="font-black">{(s.amount_minor / 100).toFixed(2)}</span>
+                              <span className="font-black">{s.amount}</span>
                             </div>
                           ))
                         )}
