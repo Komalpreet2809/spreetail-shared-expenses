@@ -28,9 +28,9 @@ class Command(BaseCommand):
         user, created = User.objects.get_or_create(
             username="demo", defaults={"email": "demo@example.com"})
         if created:
-            user.set_password("demo12345")
+            user.set_password("BrokeTogether2026!")
             user.save()
-            self.stdout.write(self.style.SUCCESS("Created demo user (demo / demo12345)"))
+            self.stdout.write(self.style.SUCCESS("Created demo user (demo / BrokeTogether2026!)"))
         else:
             self.stdout.write("Demo user already exists")
 

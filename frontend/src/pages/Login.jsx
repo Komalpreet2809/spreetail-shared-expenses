@@ -10,7 +10,7 @@ export default function Login() {
   const { login, register } = useAuth();
   const navigate = useNavigate();
   const [mode, setMode] = useState("login");
-  const [form, setForm] = useState({ username: "demo", email: "", password: "demo12345" });
+  const [form, setForm] = useState({ username: "demo", email: "", password: "BrokeTogether2026!" });
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -76,7 +76,7 @@ export default function Login() {
               {mode === "login" ? "Register" : "Log in"}
             </button>
             <div className="mt-2">
-              Demo account: <span className="font-semibold text-foreground">demo / demo12345</span>
+              Demo account: <span className="font-semibold text-foreground">demo / BrokeTogether2026!</span>
             </div>
           </div>
         </CardContent>
