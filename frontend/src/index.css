@@ -5,7 +5,7 @@
 
 :root {
   --radius: 0.85rem;
-  --background: oklch(0.99 0 0);
+  --background: oklch(0.97 0.015 245);
   --foreground: oklch(0.15 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.15 0 0);
@@ -39,7 +39,7 @@
 }
 
 .dark {
-  --background: oklch(0.08 0 0);
+  --background: oklch(0.09 0.025 245);
   --foreground: oklch(0.98 0 0);
   --card: oklch(0.13 0 0);
   --card-foreground: oklch(0.98 0 0);
@@ -114,17 +114,17 @@
   }
   body {
     background-color: var(--background);
-    background-image: radial-gradient(at 50% 0%, oklch(0.92 0.08 240 / 40%) 0%, transparent 60%),
-                      radial-gradient(at 0% 100%, oklch(0.94 0.06 142 / 25%) 0%, transparent 50%),
-                      radial-gradient(at 100% 100%, oklch(0.94 0.06 29 / 25%) 0%, transparent 50%);
+    background-image: radial-gradient(at 0% 0%, oklch(0.88 0.13 250 / 35%) 0%, transparent 60%),
+                      radial-gradient(at 100% 0%, oklch(0.90 0.12 142 / 25%) 0%, transparent 50%),
+                      radial-gradient(at 50% 100%, oklch(0.90 0.12 29 / 25%) 0%, transparent 50%);
     background-attachment: fixed;
     color: var(--foreground);
     font-feature-settings: "cv11", "ss01";
   }
   .dark body {
-    background-image: radial-gradient(at 50% 0%, oklch(0.18 0.09 240 / 35%) 0%, transparent 70%),
-                      radial-gradient(at 0% 100%, oklch(0.14 0.06 142 / 20%) 0%, transparent 50%),
-                      radial-gradient(at 100% 100%, oklch(0.14 0.06 29 / 20%) 0%, transparent 50%);
+    background-image: radial-gradient(at 0% 0%, oklch(0.18 0.15 250 / 50%) 0%, transparent 65%),
+                      radial-gradient(at 100% 0%, oklch(0.15 0.12 142 / 30%) 0%, transparent 50%),
+                      radial-gradient(at 50% 100%, oklch(0.15 0.12 29 / 30%) 0%, transparent 50%);
     background-attachment: fixed;
   }
 }
