@@ -131,7 +131,7 @@ export default function Expenses({ group, onChange }) {
       <CardContent className="p-0">
         {/* Filters and Sorting Control Bar */}
         <div className="px-6 py-4 flex flex-col gap-4 border-b border-border/80 bg-muted/5">
-          <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+          <div className="flex flex-col gap-3.5">
             {/* Search input */}
             <div className="relative w-full sm:max-w-xs">
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
@@ -154,12 +154,12 @@ export default function Expenses({ group, onChange }) {
               )}
             </div>
 
-            {/* Select Dropdowns */}
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                <span>Payer:</span>
+            {/* Select Dropdowns (Grid on mobile, flex row on desktop) */}
+            <div className="grid grid-cols-2 gap-3 w-full sm:flex sm:items-center sm:w-auto">
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-1.5 w-full sm:w-auto">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground sm:normal-case sm:font-semibold sm:text-xs">Payer</span>
                 <Select value={payer} onValueChange={setPayer}>
-                  <SelectTrigger className="h-9 w-[130px] text-xs">
+                  <SelectTrigger className="h-9 w-full sm:w-[130px] text-xs bg-card">
                     <SelectValue placeholder="All Members" />
                   </SelectTrigger>
                   <SelectContent>
@@ -173,14 +173,14 @@ export default function Expenses({ group, onChange }) {
                 </Select>
               </div>
 
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
-                <span>Sort by:</span>
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-1.5 w-full sm:w-auto">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground sm:normal-case sm:font-semibold sm:text-xs">Sort by</span>
                 <Select value={`${sortKey}-${sortOrder}`} onValueChange={(v) => {
                   const [key, order] = v.split("-");
                   setSortKey(key);
                   setSortOrder(order);
                 }}>
-                  <SelectTrigger className="h-9 w-[155px] text-xs">
+                  <SelectTrigger className="h-9 w-full sm:w-[155px] text-xs bg-card">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -195,32 +195,34 @@ export default function Expenses({ group, onChange }) {
           </div>
 
           {/* Quick Keyword Pills (Monochrome Style) */}
-          <div className="flex flex-wrap items-center gap-2 text-xs border-t border-border/10 pt-3">
-            <span className="text-muted-foreground font-semibold">Quick Tags:</span>
-            {[
-              { id: "all", label: "All" },
-              { id: "grocery", label: "Grocery" },
-              { id: "electricity", label: "Electricity" },
-              { id: "rent", label: "Rent" },
-              { id: "trip", label: "Trip/Travel" },
-              { id: "snacks", label: "Snacks/Drinks" }
-            ].map((pill) => {
-              const isActive = tag === pill.id;
-              return (
-                <button
-                  key={pill.id}
-                  type="button"
-                  onClick={() => setTag(pill.id)}
-                  className={`px-3 py-1 rounded-full border text-[11px] font-semibold transition-all cursor-pointer ${
-                    isActive
-                      ? "bg-foreground text-background border-transparent scale-102 shadow-sm font-bold"
-                      : "border-border text-muted-foreground hover:text-foreground hover:bg-muted bg-transparent"
-                  }`}
-                >
-                  {pill.label}
-                </button>
-              );
-            })}
+          <div className="flex flex-wrap items-center gap-2 text-xs border-t border-border/10 pt-3 w-full">
+            <span className="text-[10px] uppercase font-bold tracking-wider text-muted-foreground shrink-0">Tags</span>
+            <div className="flex flex-wrap gap-1.5 flex-1">
+              {[
+                { id: "all", label: "All" },
+                { id: "grocery", label: "Grocery" },
+                { id: "electricity", label: "Electricity" },
+                { id: "rent", label: "Rent" },
+                { id: "trip", label: "Trip/Travel" },
+                { id: "snacks", label: "Snacks/Drinks" }
+              ].map((pill) => {
+                const isActive = tag === pill.id;
+                return (
+                  <button
+                    key={pill.id}
+                    type="button"
+                    onClick={() => setTag(pill.id)}
+                    className={`px-3 py-1 rounded-full border text-[11px] font-semibold transition-all cursor-pointer ${
+                      isActive
+                        ? "bg-foreground text-background border-transparent scale-102 shadow-sm font-bold"
+                        : "border-border text-muted-foreground hover:text-foreground hover:bg-muted bg-transparent"
+                    }`}
+                  >
+                    {pill.label}
+                  </button>
+                );
+              })}
+            </div>
 
             {(search || payer !== "all" || tag !== "all") && (
               <button
@@ -230,7 +232,7 @@ export default function Expenses({ group, onChange }) {
                   setPayer("all");
                   setTag("all");
                 }}
-                className="text-xs text-muted-foreground hover:text-foreground font-semibold underline underline-offset-2 ml-auto cursor-pointer"
+                className="text-xs text-muted-foreground hover:text-foreground font-semibold underline underline-offset-2 ml-auto cursor-pointer shrink-0"
               >
                 Clear filters
               </button>
