@@ -577,14 +577,14 @@ export default function Balances({ groupId, group }) {
                 <p className="font-semibold text-foreground">Everyone is fully settled up!</p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-2 overflow-x-auto pb-2 scrollbar-thin">
                 {bal.settle_up.map((s, i) => (
-                  <div key={i} className="flex items-center gap-2 rounded-xl border border-border bg-muted/20 p-3 transition-all hover:shadow-sm overflow-x-auto whitespace-nowrap scrollbar-thin">
+                  <div key={i} className="flex items-center gap-2 rounded-xl border border-border bg-muted/20 p-3 transition-all hover:shadow-sm w-max min-w-full">
                     <span className="text-sm font-bold text-foreground pl-1 whitespace-nowrap shrink-0">{s.from}</span>
                     <span className="text-xs text-muted-foreground px-1 shrink-0">pays</span>
                     <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
                     <span className="text-sm font-bold text-foreground pl-1 whitespace-nowrap shrink-0">{s.to}</span>
-                    <div className="ml-auto flex items-center gap-2.5 shrink-0">
+                    <div className="ml-auto flex items-center gap-2.5 shrink-0 pl-4">
                       <span className="text-sm font-extrabold text-foreground bg-secondary/80 px-2.5 py-1 rounded-lg tabular-nums border border-border shrink-0">
                         {money(s.amount, cur)}
                       </span>
