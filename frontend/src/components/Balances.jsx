@@ -7,8 +7,10 @@ import {
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-import { ColumnChart, HBar, Initial, NetBar, StatCard, money } from "./charts";
-import { ArrowRight } from "lucide-react";
+import { ColumnChart, HBar, Initial, Legend, NetBar, StatCard, money } from "./charts";
+import {
+  ArrowRight, Wallet, Receipt, Users, Trophy, Scale, HandCoins, CalendarDays, MousePointerClick,
+} from "lucide-react";
 
 export default function Balances({ groupId }) {
   const [bal, setBal] = useState(null);
@@ -36,10 +38,11 @@ export default function Balances({ groupId }) {
     <div className="space-y-5">
       {/* KPI cards */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <StatCard label="Total spent" value={money(stats.total_spent, cur)} sub={`${stats.expense_count} expenses`} />
-        <StatCard label="Avg expense" value={money(stats.avg_expense, cur)} />
-        <StatCard label="Members" value={stats.member_count} sub={`${stats.settlement_count} settlements`} />
+        <StatCard icon={Wallet} label="Total spent" value={money(stats.total_spent, cur)} sub={`across ${stats.expense_count} expenses`} />
+        <StatCard icon={Receipt} label="Avg expense" value={money(stats.avg_expense, cur)} sub="per expense" />
+        <StatCard icon={Users} label="People in group" value={stats.member_count} sub={`${stats.settlement_count} payments recorded`} />
         <StatCard
+          icon={Trophy}
           label="Biggest expense"
           value={stats.biggest ? money(stats.biggest.amount, cur) : "—"}
           sub={stats.biggest?.description}
@@ -49,11 +52,21 @@ export default function Balances({ groupId }) {
       {/* Net balances */}
       <Card>
         <CardHeader>
-          <CardTitle>Who owes whom</CardTitle>
+          <CardTitle className="flex items-center gap-2"><Scale className="h-5 w-5" /> Who owes whom</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Bars left of center = owes the group · right = is owed. Click anyone to see the exact
-            expenses behind their number.
+            Each person's overall standing in the group.
           </p>
+          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+            <Legend
+              items={[
+                { label: "owes the group", cls: "bg-neg" },
+                { label: "is owed by the group", cls: "bg-foreground" },
+              ]}
+            />
+            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <MousePointerClick className="h-3.5 w-3.5" /> click a person for the full breakdown
+            </span>
+          </div>
         </CardHeader>
         <CardContent className="space-y-0.5">
           {bal.balances.map((b) => (
@@ -74,8 +87,10 @@ export default function Balances({ groupId }) {
       {/* Settle up */}
       <Card>
         <CardHeader>
-          <CardTitle>Settle up</CardTitle>
-          <p className="text-sm text-muted-foreground">The fewest payments that clear every debt.</p>
+          <CardTitle className="flex items-center gap-2"><HandCoins className="h-5 w-5" /> Settle up</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Make these payments and everyone is even — the fewest transfers possible.
+          </p>
         </CardHeader>
         <CardContent>
           {bal.settle_up.length === 0 ? (
@@ -83,16 +98,13 @@ export default function Balances({ groupId }) {
           ) : (
             <div className="grid gap-2 sm:grid-cols-2">
               {bal.settle_up.map((s, i) => (
-                <div key={i} className="flex items-center gap-3 rounded-lg border border-border bg-muted/30 p-3">
-                  <div className="flex items-center gap-2">
-                    <Initial name={s.from} size={26} />
-                    <span className="text-sm font-medium">{s.from}</span>
-                  </div>
+                <div key={i} className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 p-3">
+                  <Initial name={s.from} size={26} />
+                  <span className="text-sm font-medium">{s.from}</span>
+                  <span className="text-xs text-muted-foreground">pays</span>
                   <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                  <div className="flex items-center gap-2">
-                    <Initial name={s.to} size={26} />
-                    <span className="text-sm font-medium">{s.to}</span>
-                  </div>
+                  <Initial name={s.to} size={26} />
+                  <span className="text-sm font-medium">{s.to}</span>
                   <span className="ml-auto font-bold tabular-nums">{money(s.amount, cur)}</span>
                 </div>
               ))}
@@ -104,14 +116,18 @@ export default function Balances({ groupId }) {
       {/* Charts row */}
       <div className="grid gap-5 lg:grid-cols-2">
         <Card>
-          <CardHeader><CardTitle>Spending over time</CardTitle></CardHeader>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><CalendarDays className="h-5 w-5" /> Spending over time</CardTitle>
+            <p className="text-sm text-muted-foreground">Total group spending each month.</p>
+          </CardHeader>
           <CardContent>
             <ColumnChart data={stats.by_month} currency={cur} />
           </CardContent>
         </Card>
         <Card>
-          <CardHeader><CardTitle>Top contributors</CardTitle>
-            <p className="text-sm text-muted-foreground">Who has paid the most up front.</p>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Trophy className="h-5 w-5" /> Top contributors</CardTitle>
+            <p className="text-sm text-muted-foreground">Who has paid the most up front (before splitting).</p>
           </CardHeader>
           <CardContent>
             {stats.by_payer.slice(0, 6).map((p) => (

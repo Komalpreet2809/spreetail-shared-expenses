@@ -27,12 +27,29 @@ export function Initial({ name, size = 28 }) {
   );
 }
 
-export function StatCard({ label, value, sub }) {
+export function StatCard({ label, value, sub, icon: Icon }) {
   return (
     <div className="rounded-xl border border-border bg-card p-4">
-      <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className="flex items-center justify-between">
+        <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
+        {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+      </div>
       <div className="mt-1 text-2xl font-extrabold tracking-tight">{value}</div>
       {sub && <div className="mt-0.5 text-xs text-muted-foreground">{sub}</div>}
+    </div>
+  );
+}
+
+// A small always-visible colour key so charts explain themselves.
+export function Legend({ items }) {
+  return (
+    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+      {items.map((it) => (
+        <span key={it.label} className="flex items-center gap-1.5">
+          <span className={`inline-block h-2.5 w-2.5 rounded-sm ${it.cls}`} />
+          {it.label}
+        </span>
+      ))}
     </div>
   );
 }
@@ -101,12 +118,15 @@ export function NetBar({ name, netMinor, netLabel, maxAbs, currency, open, onCli
           />
         )}
       </div>
-      <div
-        className={`w-28 text-right text-sm font-bold tabular-nums shrink-0 ${
-          settled ? "text-muted-foreground" : owes ? "text-neg" : "text-pos"
-        }`}
-      >
-        {settled ? "settled" : money(netLabel, currency)}
+      <div className="w-40 text-right text-sm shrink-0">
+        {settled ? (
+          <span className="text-muted-foreground">settled up</span>
+        ) : (
+          <span className={owes ? "text-neg" : "text-pos"}>
+            <span className="font-normal">{owes ? "owes " : "is owed "}</span>
+            <span className="font-bold tabular-nums">{money(netLabel, currency)}</span>
+          </span>
+        )}
       </div>
     </button>
   );

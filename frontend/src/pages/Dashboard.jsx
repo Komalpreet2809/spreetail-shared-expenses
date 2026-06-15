@@ -13,9 +13,17 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, LogOut, Plus } from "lucide-react";
+import {
+  ChevronDown, LogOut, Plus, LayoutDashboard, Receipt, Users, Upload, Sparkles,
+} from "lucide-react";
 
-const TABS = ["Overview", "Expenses", "Members", "Import", "Ask AI"];
+const TABS = [
+  { label: "Overview", icon: LayoutDashboard },
+  { label: "Expenses", icon: Receipt },
+  { label: "Members", icon: Users },
+  { label: "Import", icon: Upload },
+  { label: "Ask AI", icon: Sparkles },
+];
 
 export default function Dashboard() {
   const { user, logout } = useAuth();
@@ -107,8 +115,10 @@ export default function Dashboard() {
 
             <Tabs value={tab} onValueChange={setTab} className="mt-5">
               <TabsList>
-                {TABS.map((t) => (
-                  <TabsTrigger key={t} value={t}>{t}</TabsTrigger>
+                {TABS.map(({ label, icon: Icon }) => (
+                  <TabsTrigger key={label} value={label}>
+                    <Icon className="h-4 w-4" /> {label}
+                  </TabsTrigger>
                 ))}
               </TabsList>
             </Tabs>

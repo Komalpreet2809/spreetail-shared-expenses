@@ -1,6 +1,6 @@
 import { useState } from "react";
 import api from "../api";
-import { SeverityBars, StatCard } from "./charts";
+import { Legend, SeverityBars, StatCard } from "./charts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -89,7 +89,20 @@ export default function ImportWizard({ group, onCommitted }) {
           </Button>
         </CardHeader>
         <CardContent className="space-y-4">
-          <SeverityBars error={sev.error} warning={sev.warning} info={sev.info} />
+          <div className="space-y-2">
+            <SeverityBars error={sev.error} warning={sev.warning} info={sev.info} />
+            <Legend
+              items={[
+                { label: `${sev.error} errors (couldn't import)`, cls: "bg-foreground" },
+                { label: `${sev.warning} warnings (changed something)`, cls: "bg-muted-foreground" },
+                { label: `${sev.info} info (safe fixes)`, cls: "bg-muted-foreground/40" },
+              ]}
+            />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Review what the app wants to do with each flagged row. Nothing is saved until you approve.
+            Green ✓ accepts the suggested action; ✕ skips the row.
+          </p>
           <Table>
             <TableHeader>
               <TableRow>
