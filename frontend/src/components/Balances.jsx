@@ -510,7 +510,7 @@ export default function Balances({ groupId, group }) {
         </Card>
 
         {/* Balance cards list */}
-        <Card className="lg:col-span-2 glow-card">
+        <Card className="lg:col-span-2 glow-card overflow-hidden">
           <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
@@ -563,7 +563,7 @@ export default function Balances({ groupId, group }) {
 
       {/* Settle up instructions & Recent Settlements Log */}
       <div className="grid gap-6 lg:grid-cols-5">
-        <Card className="lg:col-span-3 glow-card">
+        <Card className="lg:col-span-3 glow-card overflow-hidden">
           <CardHeader className="pb-2">
             <CardTitle className="flex items-center gap-2"><HandCoins className="h-5 w-5 text-primary" /> Settle up Instructions</CardTitle>
             <p className="text-sm text-muted-foreground">
@@ -604,7 +604,7 @@ export default function Balances({ groupId, group }) {
           </CardContent>
         </Card>
 
-        <Card className="lg:col-span-2 glow-card flex flex-col justify-between">
+        <Card className="lg:col-span-2 glow-card flex flex-col justify-between overflow-hidden">
           <div>
             <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2"><Receipt className="h-5 w-5 text-primary" /> Recent Settlements</CardTitle>
@@ -650,7 +650,7 @@ export default function Balances({ groupId, group }) {
       {/* Infographics row: Categories donut & Spending by month */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Category donut */}
-        <Card className="glow-card">
+        <Card className="glow-card overflow-hidden">
           <CardHeader className="pb-1">
             <CardTitle className="flex items-center gap-2"><Tag className="h-5 w-5 text-primary" /> Categorized Spending</CardTitle>
             <p className="text-sm text-muted-foreground">Group expenses classified by categories.</p>
@@ -721,7 +721,7 @@ export default function Balances({ groupId, group }) {
         </Card>
 
         {/* Spending over time */}
-        <Card className="glow-card">
+        <Card className="glow-card overflow-hidden">
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><CalendarDays className="h-5 w-5 text-primary" /> Spending Over Time</CardTitle>
             <p className="text-sm text-muted-foreground">Monthly breakdown of group spending.</p>
@@ -733,7 +733,7 @@ export default function Balances({ groupId, group }) {
       </div>
 
       {/* Membership History Timeline */}
-      <Card className="glow-card">
+      <Card className="glow-card overflow-hidden">
         <CardHeader className="pb-1">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
