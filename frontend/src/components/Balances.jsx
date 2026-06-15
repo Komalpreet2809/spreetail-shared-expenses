@@ -30,6 +30,7 @@ export default function Balances({ groupId, group }) {
   const [draggedNode, setDraggedNode] = useState(null);
   const [dragStart, setDragStart] = useState(null);
   const [hasDragged, setHasDragged] = useState(false);
+  const [selectedNode, setSelectedNode] = useState(null);
 
   useEffect(() => {
     if (group && group.members) {
@@ -119,6 +120,7 @@ export default function Balances({ groupId, group }) {
   const handleReset = () => {
     setZoom(1);
     setNodePositions({});
+    setSelectedNode(null);
   };
 
   useEffect(() => {
@@ -209,6 +211,21 @@ export default function Balances({ groupId, group }) {
     };
   }).filter(e => e.fromNode && e.toNode);
 
+  const activeHighlightNode = hoveredNode !== null ? hoveredNode : selectedNode;
+
+  const connectedNodeIds = new Set();
+  if (activeHighlightNode !== null) {
+    connectedNodeIds.add(activeHighlightNode);
+    graphEdges.forEach(e => {
+      if (e.fromNode.id === activeHighlightNode) {
+        connectedNodeIds.add(e.toNode.id);
+      }
+      if (e.toNode.id === activeHighlightNode) {
+        connectedNodeIds.add(e.fromNode.id);
+      }
+    });
+  }
+
   return (
     <div className="space-y-6">
       {/* KPI cards */}
@@ -241,6 +258,7 @@ export default function Balances({ groupId, group }) {
               className={`w-full max-w-[340px] h-auto overflow-visible select-none ${
                 draggedNode !== null ? "cursor-grabbing" : "cursor-grab"
               }`}
+              onClick={() => setSelectedNode(null)}
               onMouseMove={handleMouseMove}
               onMouseUp={handleDragEnd}
               onMouseLeave={handleDragEnd}
@@ -262,9 +280,9 @@ export default function Balances({ groupId, group }) {
               <g transform={`scale(${zoom})`} style={{ transformOrigin: "200px 200px", transition: "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)" }}>
               {/* Edge lines */}
               {graphEdges.map((e) => {
-                const isHovered = hoveredNode !== null;
-                const isFromHovered = hoveredNode === e.fromNode.id;
-                const isToHovered = hoveredNode === e.toNode.id;
+                const isHighlightActive = activeHighlightNode !== null;
+                const isFromHighlight = activeHighlightNode === e.fromNode.id;
+                const isToHighlight = activeHighlightNode === e.toNode.id;
                 
                 let strokeColor = "var(--border)";
                 let strokeWidth = 1.5;
@@ -272,13 +290,13 @@ export default function Balances({ groupId, group }) {
                 let marker = "url(#arrow)";
                 let opacity = 1;
 
-                if (isHovered) {
-                  if (isFromHovered) {
+                if (isHighlightActive) {
+                  if (isFromHighlight) {
                     strokeColor = "var(--neg)";
                     strokeWidth = 3;
                     active = true;
                     marker = "url(#arrow-active-out)";
-                  } else if (isToHovered) {
+                  } else if (isToHighlight) {
                     strokeColor = "var(--pos)";
                     strokeWidth = 3;
                     active = true;
@@ -301,7 +319,7 @@ export default function Balances({ groupId, group }) {
                     
                     {/* Animated moving dot for active flow */}
                     {active && (
-                      <circle r="4.5" fill={isFromHovered ? "var(--neg)" : "var(--pos)"}>
+                      <circle r="4.5" fill={isFromHighlight ? "var(--neg)" : "var(--pos)"}>
                         <animateMotion dur="2.5s" repeatCount="indefinite" path={`M ${e.fromNode.x} ${e.fromNode.y} L ${e.toNode.x} ${e.toNode.y}`} />
                       </circle>
                     )}
@@ -325,16 +343,26 @@ export default function Balances({ groupId, group }) {
 
               {/* Node Circles */}
               {graphNodes.map((n) => {
-                const isHovered = hoveredNode !== null;
-                const isSelf = hoveredNode === n.id;
+                const isHighlightActive = activeHighlightNode !== null;
+                const isSelf = activeHighlightNode === n.id;
+                const isConnected = connectedNodeIds.has(n.id);
+                
                 let opacity = 1;
                 let scale = 1;
+                let strokeColor = "var(--primary)";
+                let strokeWidth = 2.5;
 
-                if (isHovered) {
+                if (isHighlightActive) {
                   if (isSelf) {
                     scale = 1.15;
+                    strokeColor = "var(--primary)";
+                    strokeWidth = 3.5;
+                  } else if (isConnected) {
+                    scale = 1.05;
+                    strokeColor = "var(--foreground)";
+                    strokeWidth = 2.5;
                   } else {
-                    opacity = 0.4;
+                    opacity = 0.15;
                   }
                 }
 
@@ -360,10 +388,10 @@ export default function Balances({ groupId, group }) {
                       setHasDragged(false);
                       setDraggedNode(n.id);
                     }}
-                    onClick={() => {
+                    onClick={(e) => {
+                      e.stopPropagation();
                       if (hasDragged) return;
-                      const b = bal.balances.find(x => x.member_id === n.id);
-                      if (b) openDrill(b);
+                      setSelectedNode(prev => prev === n.id ? null : n.id);
                     }}
                   >
                     <circle cx={n.x} cy={n.y} r="18" fill="var(--card)" stroke="var(--primary)" strokeWidth="2.5" className="shadow-sm" />
@@ -410,6 +438,33 @@ export default function Balances({ groupId, group }) {
                 <RotateCcw className="h-4 w-4" />
               </Button>
             </div>
+
+            {/* Floating Selection Details */}
+            {selectedNode !== null && (
+              <div className="absolute top-4 right-4 flex items-center gap-2 bg-card/90 backdrop-blur border border-border px-3 py-1.5 rounded-xl shadow-md z-10 animate-fadeIn">
+                <Initial name={group.members.find(m => m.id === selectedNode)?.name} size={18} />
+                <span className="text-xs font-extrabold text-foreground">
+                  {group.members.find(m => m.id === selectedNode)?.name}
+                </span>
+                <Button
+                  size="xs"
+                  className="h-6 text-[10px] px-2.5 font-bold cursor-pointer rounded-md shadow-sm ml-1"
+                  onClick={() => {
+                    const b = bal.balances.find(x => x.member_id === selectedNode);
+                    if (b) openDrill(b);
+                  }}
+                >
+                  View Receipt
+                </Button>
+                <button
+                  type="button"
+                  className="h-6 w-6 p-0 flex items-center justify-center cursor-pointer text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+                  onClick={() => setSelectedNode(null)}
+                >
+                  ✕
+                </button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
