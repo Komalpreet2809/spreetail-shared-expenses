@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
@@ -10,7 +11,8 @@ import {
 import { ColumnChart, HBar, Initial, Legend, NetBar, StatCard, money } from "./charts";
 import {
   ArrowRight, Wallet, Receipt, Users, Trophy, Scale, HandCoins, CalendarDays,
-  MousePointerClick, Utensils, Zap, Car, Tag, Calendar, ShieldCheck, Info
+  MousePointerClick, Utensils, Zap, Car, Tag, Calendar, ShieldCheck, Info,
+  ZoomIn, ZoomOut, RotateCcw
 } from "lucide-react";
 
 export default function Balances({ groupId, group }) {
@@ -23,6 +25,7 @@ export default function Balances({ groupId, group }) {
   // Interactive hover states
   const [hoveredNode, setHoveredNode] = useState(null);
   const [hoveredCategory, setHoveredCategory] = useState(null);
+  const [zoom, setZoom] = useState(1);
 
   useEffect(() => {
     api.get(`/groups/${groupId}/balances`).then((r) => setBal(r.data));
@@ -135,7 +138,7 @@ export default function Balances({ groupId, group }) {
               An interactive network of group debts. Hover over a person to highlight their debts.
             </p>
           </CardHeader>
-          <CardContent className="flex items-center justify-center p-4 min-h-[350px]">
+          <CardContent className="flex items-center justify-center p-4 min-h-[350px] relative">
             <svg viewBox="0 0 400 400" className="w-full max-w-[340px] h-auto overflow-visible select-none">
               <defs>
                 <marker id="arrow" viewBox="0 0 10 10" refX="21" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
@@ -148,7 +151,8 @@ export default function Balances({ groupId, group }) {
                   <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--pos)" />
                 </marker>
               </defs>
-
+              
+              <g transform={`scale(${zoom})`} style={{ transformOrigin: "200px 200px", transition: "transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)" }}>
               {/* Edge lines */}
               {graphEdges.map((e) => {
                 const isHovered = hoveredNode !== null;
@@ -250,7 +254,39 @@ export default function Balances({ groupId, group }) {
                   </g>
                 );
               })}
+              </g>
             </svg>
+            
+            {/* Floating Zoom Controls */}
+            <div className="absolute bottom-4 right-4 flex flex-col gap-1 bg-card/85 backdrop-blur border border-border p-1.5 rounded-xl shadow-sm z-10">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg hover:bg-muted"
+                onClick={() => setZoom(z => Math.min(z + 0.15, 2.5))}
+                title="Zoom In"
+              >
+                <ZoomIn className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg hover:bg-muted"
+                onClick={() => setZoom(z => Math.max(z - 0.15, 0.5))}
+                title="Zoom Out"
+              >
+                <ZoomOut className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg hover:bg-muted"
+                onClick={() => setZoom(1)}
+                title="Reset Zoom"
+              >
+                <RotateCcw className="h-4 w-4" />
+              </Button>
+            </div>
           </CardContent>
         </Card>
 
