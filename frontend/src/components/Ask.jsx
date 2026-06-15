@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import api from "../api";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -31,21 +31,12 @@ const SUGGESTIONS = [
   },
 ];
 
-export default function Ask({ groupId }) {
+export default function Ask({ groupId, onClose }) {
   const [q, setQ] = useState("");
-  const [messages, setMessages] = useState([
-    {
-      id: "welcome",
-      role: "assistant",
-      text: "Hi! I am the BrokeTogether AI Copilot. Ask me questions about your flat group's expenses, debts, or settlement plans in plain English. Every calculation is validated against our deterministic database engine.",
-      ai_used: true,
-      model: "System Engine",
-      facts: null,
-    }
-  ]);
+  const [messages, setMessages] = useState([]);
   const [busy, setBusy] = useState(false);
   const [copiedId, setCopiedId] = useState(null);
-  const [activeMessageId, setActiveMessageId] = useState("welcome");
+  const [activeMessageId, setActiveMessageId] = useState(null);
   const [factsTab, setFactsTab] = useState("structured");
 
   const chatEndRef = useRef(null);
@@ -98,17 +89,8 @@ export default function Ask({ groupId }) {
   }
 
   function clearChat() {
-    setMessages([
-      {
-        id: "welcome",
-        role: "assistant",
-        text: "Hi! I am the BrokeTogether AI Copilot. Ask me questions about your flat group's expenses, debts, or settlement plans in plain English. Every calculation is validated against our deterministic database engine.",
-        ai_used: true,
-        model: "System Engine",
-        facts: null,
-      }
-    ]);
-    setActiveMessageId("welcome");
+    setMessages([]);
+    setActiveMessageId(null);
   }
 
   function copyToClipboard(id, text) {
@@ -153,72 +135,65 @@ export default function Ask({ groupId }) {
   const activeFacts = activeMsg?.facts;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-5 items-stretch min-h-[500px]">
-      {/* Main Chat Area */}
-      <Card className="lg:col-span-3 flex flex-col justify-between glow-card overflow-hidden">
-        <CardHeader className="pb-3 border-b border-border flex flex-row items-center justify-between space-y-0">
-          <div className="flex items-center gap-2">
-            <div className="p-2 bg-primary/10 rounded-lg text-foreground">
-              <MessageSquare className="h-5 w-5" />
-            </div>
-            <div>
-              <CardTitle className="text-base flex items-center gap-1.5">
-                AI Copilot <Bot className="h-4 w-4 text-muted-foreground animate-pulse" />
-              </CardTitle>
-              <p className="text-[10px] text-muted-foreground">Deterministic financial audit queries</p>
-            </div>
+    <div className="flex flex-col justify-between glow-card overflow-hidden h-[480px] w-full border border-border/60 shadow-[0_20px_50px_rgba(0,0,0,0.3)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.6)] bg-neutral-200/95 dark:bg-neutral-800/95 backdrop-blur-md p-0 gap-0 rounded-2xl text-card-foreground">
+      <CardHeader className="pt-5 pb-3 px-5 border-b border-border flex flex-row items-center justify-between space-y-0 shrink-0 rounded-t-2xl">
+        <div className="flex items-center gap-2">
+          <div className="p-2 bg-primary/10 rounded-lg text-foreground">
+            <MessageSquare className="h-5 w-5" />
           </div>
-          {messages.length > 1 && (
-            <Button variant="ghost" size="icon" onClick={clearChat} className="h-8 w-8 text-muted-foreground hover:text-destructive" title="Clear chat history">
+          <div>
+            <CardTitle className="text-sm flex items-center gap-1.5">
+              Brokie <Bot className="h-4 w-4 text-muted-foreground animate-pulse" />
+            </CardTitle>
+            <p className="text-[10px] text-muted-foreground">Ask questions about group expenses.</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5">
+          {messages.length > 0 && (
+            <Button variant="ghost" size="icon" onClick={clearChat} className="h-8 w-8 text-muted-foreground hover:text-destructive cursor-pointer rounded-lg" title="Clear chat history">
               <Trash2 className="h-4 w-4" />
             </Button>
           )}
-        </CardHeader>
+          {onClose && (
+            <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg" title="Close chat">
+              <span className="text-sm font-bold">✕</span>
+            </Button>
+          )}
+        </div>
+      </CardHeader>
 
         {/* Message scroll list */}
-        <CardContent className="flex-1 overflow-y-auto p-4 space-y-4 max-h-[380px] min-h-[300px]">
+        <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
           {messages.map((m) => {
             const isUser = m.role === "user";
             return (
               <div
                 key={m.id}
-                onClick={() => m.facts && setActiveMessageId(m.id)}
-                className={`flex flex-col ${isUser ? "items-end" : "items-start"} ${
-                  m.facts ? "cursor-pointer group/msg" : ""
-                }`}
+                className={`flex flex-col ${isUser ? "items-end" : "items-start"}`}
               >
                 <div
-                  className={`rounded-2xl px-4 py-2.5 text-sm transition-all ${
+                  className={`rounded-2xl px-4 py-2.5 text-xs transition-all max-w-[85%] ${
                     isUser
                       ? "bg-primary text-primary-foreground rounded-tr-sm shadow-sm"
                       : "bg-muted/40 rounded-tl-sm border border-border/40 text-foreground space-y-2"
-                  } ${activeMessageId === m.id && !isUser ? "ring-2 ring-foreground/20 bg-muted/70" : ""}`}
+                  }`}
                 >
                   <div className="whitespace-pre-line leading-relaxed">
                     {isUser ? m.text : formatResponseText(m.text)}
                   </div>
                   
                   {!isUser && (
-                    <div className="flex items-center justify-between gap-4 pt-1.5 border-t border-border/20 text-[10px] text-muted-foreground">
-                      <div className="flex items-center gap-1.5">
-                        <Cpu className="h-3 w-3" />
-                        <span className="font-semibold">{m.model || "Engine"}</span>
-                        {m.facts && (
-                          <Badge variant="secondary" className="text-[9px] py-0 px-1 hover:bg-muted font-bold transition-all">
-                            Click to inspect facts
-                          </Badge>
-                        )}
-                      </div>
+                    <div className="flex items-center justify-end pt-1 border-t border-border/10">
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-5 w-5 text-muted-foreground hover:text-foreground"
+                        className="h-5 w-5 text-muted-foreground hover:text-foreground cursor-pointer"
                         onClick={(e) => {
                           e.stopPropagation();
                           copyToClipboard(m.id, m.text);
                         }}
                       >
-                        {copiedId === m.id ? <Check className="h-3 w-3 text-pos" /> : <Clipboard className="h-3 w-3" />}
+                        {copiedId === m.id ? <Check className="h-3.5 w-3.5 text-pos" /> : <Clipboard className="h-3.5 w-3.5" />}
                       </Button>
                     </div>
                   )}
@@ -231,7 +206,7 @@ export default function Ask({ groupId }) {
             <div className="flex flex-col items-start mr-auto">
               <div className="flex items-center gap-2.5 bg-muted/20 border border-border/40 rounded-2xl rounded-tl-sm px-4 py-3">
                 <Bot className="h-4 w-4 animate-bounce text-muted-foreground" />
-                <span className="text-xs text-muted-foreground font-medium animate-pulse">Copilot is querying the engine...</span>
+                <span className="text-xs text-muted-foreground font-medium animate-pulse">Brokie is querying the engine...</span>
               </div>
             </div>
           )}
@@ -239,8 +214,8 @@ export default function Ask({ groupId }) {
         </CardContent>
 
         {/* Suggestion Grid (shown only when thread has only the welcome message) */}
-        {messages.length === 1 && !busy && (
-          <div className="px-4 pb-4 grid gap-3 sm:grid-cols-3">
+        {messages.length === 0 && !busy && (
+          <div className="px-4 pb-4 grid gap-3 sm:grid-cols-3 shrink-0">
             {SUGGESTIONS.map((item, idx) => {
               const Icon = item.icon;
               return (
@@ -263,157 +238,19 @@ export default function Ask({ groupId }) {
         )}
 
         {/* Input Bar */}
-        <div className="p-4 border-t border-border flex gap-2 bg-muted/10">
+        <div className="p-4 border-t border-border flex gap-2 bg-muted/10 shrink-0 rounded-b-2xl">
           <Input
             placeholder="Ask AI e.g. Who owes Aisha money?"
             value={q}
             onChange={(e) => setQ(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSend()}
             disabled={busy}
-            className="flex-1 bg-card border-border shadow-inner"
+            className="flex-1 bg-card border-border shadow-inner text-xs"
           />
           <Button disabled={busy || !q.trim()} onClick={() => handleSend()} className="shadow-sm">
             <Send className="h-4 w-4" />
           </Button>
         </div>
-      </Card>
-
-      {/* Facts Side Inspector Panel */}
-      <Card className="lg:col-span-2 glow-card flex flex-col justify-between overflow-hidden">
-        <CardHeader className="pb-2 border-b border-border">
-          <CardTitle className="text-sm flex items-center gap-2">
-            <Database className="h-4 w-4 text-muted-foreground" /> Deterministic Engine Context
-          </CardTitle>
-          <p className="text-[10px] text-muted-foreground">
-            Raw ledger parameters audited to generate AI responses.
-          </p>
-        </CardHeader>
-        
-        <CardContent className="flex-1 p-3 overflow-y-auto max-h-[360px] min-h-[200px] text-xs">
-          {activeFacts ? (
-            <div className="space-y-4">
-              <div className="flex border-b border-border pb-1 justify-between items-center">
-                <span className="font-semibold text-muted-foreground uppercase text-[9px] tracking-wider">Facts Inspector</span>
-                <div className="flex gap-1">
-                  <button
-                    onClick={() => setFactsTab("structured")}
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                      factsTab === "structured" ? "bg-muted text-foreground" : "text-muted-foreground"
-                    }`}
-                  >
-                    Structured
-                  </button>
-                  <button
-                    onClick={() => setFactsTab("json")}
-                    className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                      factsTab === "json" ? "bg-muted text-foreground" : "text-muted-foreground"
-                    }`}
-                  >
-                    Raw JSON
-                  </button>
-                </div>
-              </div>
-
-              {factsTab === "structured" ? (
-                <div className="space-y-3">
-                  {/* Group Meta Info */}
-                  <div className="grid grid-cols-2 gap-2 border border-border/60 rounded-xl p-2.5 bg-muted/15 font-mono text-[10px]">
-                    <div>
-                      <span className="text-muted-foreground block text-[9px]">Base Currency</span>
-                      <span className="font-bold">{activeFacts.currency || "INR"}</span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground block text-[9px]">Total Members</span>
-                      <span className="font-bold">{activeFacts.net_balances?.length || 0}</span>
-                    </div>
-                  </div>
-
-                  {/* Balances Audit Trail Table */}
-                  {activeFacts.net_balances && (
-                    <div className="space-y-1.5">
-                      <div className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1">
-                        <ListFilter className="h-3 w-3" /> Group Balances Array
-                      </div>
-                      <div className="border border-border/80 rounded-xl overflow-hidden">
-                        <Table>
-                          <TableHeader className="bg-muted/20">
-                            <TableRow className="h-7">
-                              <TableHead className="py-1 h-7 text-[10px]">Member</TableHead>
-                              <TableHead className="py-1 h-7 text-right text-[10px]">Net Balance</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {activeFacts.net_balances.map((b, idx) => {
-                              const isOwed = b.status === "is owed" || Number(b.net) > 0;
-                              return (
-                                <TableRow key={idx} className="h-7 hover:bg-muted/10">
-                                  <TableCell className="py-1 h-7 font-bold font-mono text-[10px]">{b.name}</TableCell>
-                                  <TableCell className={`py-1 h-7 text-right font-mono text-[10px] font-semibold ${
-                                    isOwed ? "text-pos" : "text-neg"
-                                  }`}>
-                                    {isOwed ? "+" : ""}{b.net}
-                                  </TableCell>
-                                </TableRow>
-                              );
-                            })}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Settle Up Directives */}
-                  {activeFacts.who_pays_whom && (
-                    <div className="space-y-1.5">
-                      <div className="text-[10px] uppercase font-bold text-muted-foreground flex items-center gap-1">
-                        <Cpu className="h-3 w-3" /> Simplified Settle Up
-                      </div>
-                      <div className="space-y-1">
-                        {activeFacts.who_pays_whom.length === 0 ? (
-                          <div className="text-[10px] text-muted-foreground italic p-2 border border-dashed rounded-lg text-center">
-                            Everyone fully cleared.
-                          </div>
-                        ) : (
-                          activeFacts.who_pays_whom.map((s, idx) => (
-                            <div key={idx} className="flex justify-between items-center p-2 rounded-lg border border-border/40 bg-muted/10 font-mono text-[10px]">
-                              <div>
-                                <span className="font-bold">{s.from}</span>
-                                <span className="text-[9px] text-muted-foreground px-1.5">pays</span>
-                                <span className="font-bold">{s.to}</span>
-                              </div>
-                              <span className="font-black">{s.amount}</span>
-                            </div>
-                          ))
-                        )}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <pre className="overflow-x-auto rounded-lg border border-border bg-background p-2.5 text-[9px] font-mono leading-tight">
-                  {JSON.stringify(activeFacts, null, 2)}
-                </pre>
-              )}
-            </div>
-          ) : (
-            <div className="h-full flex flex-col items-center justify-center text-center p-6 border border-dashed border-border rounded-xl bg-muted/5 min-h-[240px]">
-              <Database className="h-8 w-8 text-muted-foreground/60 mb-2" />
-              <span className="font-bold text-foreground text-xs block">No audited facts loaded</span>
-              <p className="text-[10px] text-muted-foreground max-w-[180px] mt-1">
-                Click a response bubble with a database facts badge to inspect its raw relational metadata.
-              </p>
-            </div>
-          )}
-        </CardContent>
-
-        {/* Accuracy and constraints compliance footer */}
-        <div className="p-3 border-t border-border bg-muted/10 text-[9px] text-muted-foreground flex items-start gap-1.5">
-          <ShieldCheck className="h-3.5 w-3.5 text-foreground shrink-0 mt-0.5" />
-          <span>
-            <strong>Deterministic Core Compliance</strong>: All numbers queried by this agent are retrieved directly from SQLite via minor integer calculation. Hallucinations are physically blocked by local engine checks.
-          </span>
-        </div>
-      </Card>
-    </div>
+      </div>
   );
 }

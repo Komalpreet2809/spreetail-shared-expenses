@@ -98,8 +98,7 @@ export default function ImportWizard({ group, onCommitted }) {
             <CardTitle>Import expenses CSV</CardTitle>
           </div>
           <p className="text-sm text-muted-foreground">
-            Upload the flatmates' messy spreadsheet export <code className="rounded bg-muted px-1.5 py-0.5 font-mono">expenses_export.csv</code>.
-            The app parses the file, checks for 12+ deliberate data anomalies, displays the proposed resolutions, and writes nothing until approved.
+            Upload expenses CSV and resolve anomalies.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -203,7 +202,7 @@ export default function ImportWizard({ group, onCommitted }) {
               <FileSpreadsheet className="h-5 w-5 text-primary" /> Staged CSV Inspector
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              Nothing is saved to the ledger database until you commit below. Clicking a row shows its parsing breakdown.
+              Review staged expenses before committing them.
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">

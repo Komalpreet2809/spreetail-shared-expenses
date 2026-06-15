@@ -40,7 +40,7 @@ export default function Login() {
             <span>Broke<span className="text-muted-foreground">Together</span></span>
           </div>
           <div className="text-sm text-muted-foreground">
-            Shared expenses for flatmates — settle up without the awkward math.
+            Shared expenses for flatmates made simple.
           </div>
         </CardHeader>
         <CardContent>

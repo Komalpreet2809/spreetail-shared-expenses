@@ -19,13 +19,34 @@ from django.conf import settings
 from expenses.balances import group_balances, member_breakdown
 from groups.models import Member
 
+from collections import defaultdict
+
 SYSTEM_PROMPT = (
-    "You are the assistant for a shared-expenses app. You are given EXACT, "
-    "already-computed balance facts as JSON. Answer the user's question using "
-    "ONLY those numbers. Never invent, add, or recompute amounts. All amounts "
-    "are in {currency}. If the question cannot be answered from the facts, say "
-    "so plainly. Keep answers to 1-3 short sentences."
+    "You are Brokie, the friendly AI copilot for BrokeTogether, a premium shared-expenses dashboard.\n"
+    "If the user greets you (e.g., 'hey', 'hello', 'hi') or asks about the app, welcome them warmly, introduce yourself, "
+    "and explain the components of BrokeTogether:\n"
+    "- Overview: Displays member balances (who owes whom), direct settle-up actions, and recent settlements.\n"
+    "- Expenses: View, add, or delete group expenses, detailing who paid and split shares.\n"
+    "- Members: View active group members and add new members to the group.\n"
+    "- Import: An interactive Import Wizard that imports bank statements or CSV logs to quickly parse transactions.\n"
+    "- Brokie AI: This floating assistant that handles natural-language expense queries and settle-up advice.\n\n"
+    "For database, balance, expense history, or category spending questions, you are given EXACT, already-computed facts as JSON. "
+    "Answer the user's question using ONLY those numbers. Never invent, add, or recompute amounts. "
+    "All amounts are in {currency}. If the question cannot be answered from the facts, say so plainly. "
+    "Keep answers to 1-3 short sentences, remaining extremely clear, concise, and helpful."
 )
+
+
+def get_category(description: str) -> str:
+    """Classify expense descriptions into standard frontend categories."""
+    desc = description.lower()
+    if any(k in desc for k in ["dinner", "marina", "thalassa", "bites", "groceries", "food", "pizza", "lunch"]):
+        return "Food"
+    if any(k in desc for k in ["electricity", "wifi", "internet", "power", "water", "gas", "rent", "deposit"]):
+        return "Bills"
+    if any(k in desc for k in ["cab", "taxi", "uber", "flight", "trip", "travel", "parasailing"]):
+        return "Travel"
+    return "Others"
 
 
 def build_facts(group) -> dict:
@@ -40,6 +61,30 @@ def build_facts(group) -> dict:
             "total_paid": bd["total_paid"],
             "total_owed": bd["total_owed"],
         })
+
+    # Fetch recent expenses
+    recent_expenses = []
+    for e in group.expenses.order_by("-date", "-id")[:15].select_related("paid_by"):
+        amount_base = float(e.amount_base_minor) / 100.0
+        recent_expenses.append({
+            "description": e.description,
+            "amount": amount_base,
+            "paid_by": e.paid_by.name,
+            "category": get_category(e.description),
+            "date": str(e.date),
+        })
+
+    # Calculate category spending
+    category_totals = defaultdict(int)
+    for e in group.expenses.all():
+        cat = get_category(e.description)
+        category_totals[cat] += e.amount_base_minor
+
+    category_summary = {
+        cat: float(amount_minor) / 100.0
+        for cat, amount_minor in category_totals.items()
+    }
+
     return {
         "currency": balances["currency"],
         "net_balances": [
@@ -48,6 +93,8 @@ def build_facts(group) -> dict:
         ],
         "who_pays_whom": balances["settle_up"],
         "per_member_totals": per_member,
+        "recent_expenses": recent_expenses,
+        "category_spending_summary": dict(category_summary),
     }
 
 

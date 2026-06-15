@@ -8,7 +8,16 @@ import "./index.css";
 
 function Protected({ children }) {
   const { user, loading } = useAuth();
-  if (loading) return <div className="center muted">Loading…</div>;
+  if (loading) {
+    return (
+      <div className="grid min-h-screen place-items-center text-muted-foreground">
+        <div className="flex items-center gap-3">
+          <span className="h-5 w-5 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-foreground" />
+          Loading…
+        </div>
+      </div>
+    );
+  }
   return user ? children : <Navigate to="/login" replace />;
 }
 

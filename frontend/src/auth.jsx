@@ -8,13 +8,24 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (localStorage.getItem("access")) {
-      api.get("/auth/me").then((r) => setUser(r.data)).catch(() => {}).finally(() =>
-        setLoading(false)
-      );
-    } else {
+    const token = localStorage.getItem("access");
+    if (!token) {
       setLoading(false);
+      return;
     }
+    // Render immediately using the cached identity so a refresh never blocks on
+    // a cold backend. Verify the session in the background; the api interceptor
+    // handles a hard 401 (expired token) by redirecting to /login.
+    const cached = localStorage.getItem("username");
+    if (cached) setUser({ username: cached });
+    setLoading(false);
+    api
+      .get("/auth/me")
+      .then((r) => {
+        setUser(r.data);
+        localStorage.setItem("username", r.data.username);
+      })
+      .catch(() => {});
   }, []);
 
   async function login(username, password) {
@@ -23,6 +34,7 @@ export function AuthProvider({ children }) {
     localStorage.setItem("refresh", data.refresh);
     const me = await api.get("/auth/me");
     setUser(me.data);
+    localStorage.setItem("username", me.data.username);
   }
 
   async function register(username, email, password) {

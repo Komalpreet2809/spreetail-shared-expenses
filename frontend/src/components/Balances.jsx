@@ -12,13 +12,14 @@ import { ColumnChart, HBar, Initial, Legend, NetBar, StatCard, money } from "./c
 import {
   ArrowRight, Wallet, Receipt, Users, Trophy, Scale, HandCoins, CalendarDays,
   MousePointerClick, Utensils, Zap, Car, Tag, Calendar, ShieldCheck, Info,
-  ZoomIn, ZoomOut, RotateCcw
+  ZoomIn, ZoomOut, RotateCcw, Check, Trash2
 } from "lucide-react";
 
 export default function Balances({ groupId, group }) {
   const [bal, setBal] = useState(null);
   const [stats, setStats] = useState(null);
   const [expenses, setExpenses] = useState([]);
+  const [settlements, setSettlements] = useState([]);
   const [openMember, setOpenMember] = useState(null);
   const [detail, setDetail] = useState(null);
   
@@ -123,10 +124,15 @@ export default function Balances({ groupId, group }) {
     setSelectedNode(null);
   };
 
-  useEffect(() => {
+  function loadData() {
     api.get(`/groups/${groupId}/balances`).then((r) => setBal(r.data));
     api.get(`/groups/${groupId}/stats`).then((r) => setStats(r.data));
     api.get(`/expenses/?group=${groupId}`).then((r) => setExpenses(r.data));
+    api.get(`/settlements/?group=${groupId}`).then((r) => setSettlements(r.data));
+  }
+
+  useEffect(() => {
+    loadData();
   }, [groupId]);
 
   async function openDrill(b) {
@@ -134,6 +140,32 @@ export default function Balances({ groupId, group }) {
     setDetail(null);
     const { data } = await api.get(`/groups/${groupId}/members/${b.member_id}/breakdown`);
     setDetail(data);
+  }
+
+  async function handleSettle(s) {
+    try {
+      await api.post("/settlements/", {
+        group: groupId,
+        from_member: s.from_id,
+        to_member: s.to_id,
+        date: new Date().toISOString().slice(0, 10),
+        amount: s.amount,
+        currency: bal?.currency || "INR",
+        notes: "Settled via Settle Up"
+      });
+      loadData();
+    } catch (err) {
+      console.error("Error recording settlement:", err);
+    }
+  }
+
+  async function handleDeleteSettlement(id) {
+    try {
+      await api.delete(`/settlements/${id}/`);
+      loadData();
+    } catch (err) {
+      console.error("Error deleting settlement:", err);
+    }
   }
 
   if (!bal || !stats || !group) return <div className="text-muted-foreground p-8 text-center">Loading dashboard…</div>;
@@ -171,14 +203,14 @@ export default function Balances({ groupId, group }) {
   const segments = Object.entries(categories).map(([key, cat]) => {
     const percent = totalSpent > 0 ? cat.amount / totalSpent : 0;
     const strokeLength = percent * 314.159;
-    const strokeOffset = 314.159 - (accumulatedPercent * 314.159);
+    const rotateAngle = (accumulatedPercent * 360) - 90;
     accumulatedPercent += percent;
     return {
       key,
       ...cat,
       percent,
       strokeLength,
-      strokeOffset
+      rotateAngle
     };
   }).filter(s => s.amount > 0);
 
@@ -249,7 +281,7 @@ export default function Balances({ groupId, group }) {
               <Scale className="h-5 w-5 text-primary" /> Visual Settlement Map
             </CardTitle>
             <p className="text-sm text-muted-foreground">
-              An interactive network of group debts. Hover over a person to highlight their debts.
+              Interactive network showing who owes whom.
             </p>
           </CardHeader>
           <CardContent className="relative flex items-center justify-center p-4 min-h-[350px]">
@@ -484,7 +516,7 @@ export default function Balances({ groupId, group }) {
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-primary" /> Member Standing
               </CardTitle>
-              <p className="text-sm text-muted-foreground">Click a person to inspect their receipt.</p>
+              <p className="text-sm text-muted-foreground">Click person to view their receipt.</p>
             </div>
             <Legend
               items={[
@@ -529,37 +561,91 @@ export default function Balances({ groupId, group }) {
         </Card>
       </div>
 
-      {/* Settle up instructions */}
-      <Card className="glow-card">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2"><HandCoins className="h-5 w-5 text-primary" /> Settle up Instructions</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            A simplified ledger showing the minimal transactions needed to clear all debts.
-          </p>
-        </CardHeader>
-        <CardContent>
-          {bal.settle_up.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-6 text-center border border-dashed border-border rounded-xl">
-              <span className="text-2xl mb-2">🎉</span>
-              <p className="font-semibold text-foreground">Everyone is fully settled up!</p>
-            </div>
-          ) : (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {bal.settle_up.map((s, i) => (
-                <div key={i} className="flex items-center gap-2 rounded-xl border border-border bg-muted/20 p-3.5 transition-all hover:scale-101 hover:shadow-sm">
-                  <span className="text-sm font-bold text-foreground pl-1">{s.from}</span>
-                  <span className="text-xs text-muted-foreground px-1">pays</span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
-                  <span className="text-sm font-bold text-foreground pl-1">{s.to}</span>
-                  <span className="ml-auto text-sm font-extrabold text-foreground bg-secondary/80 px-2.5 py-1 rounded-lg tabular-nums border border-border">
-                    {money(s.amount, cur)}
-                  </span>
+      {/* Settle up instructions & Recent Settlements Log */}
+      <div className="grid gap-6 lg:grid-cols-5">
+        <Card className="lg:col-span-3 glow-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2"><HandCoins className="h-5 w-5 text-primary" /> Settle up Instructions</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Minimal transactions to clear all debts.
+            </p>
+          </CardHeader>
+          <CardContent>
+            {bal.settle_up.length === 0 ? (
+              <div className="flex flex-col items-center justify-center p-6 text-center border border-dashed border-border rounded-xl">
+                <span className="text-2xl mb-2">🎉</span>
+                <p className="font-semibold text-foreground">Everyone is fully settled up!</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {bal.settle_up.map((s, i) => (
+                  <div key={i} className="flex items-center gap-2 rounded-xl border border-border bg-muted/20 p-3 transition-all hover:shadow-sm">
+                    <span className="text-sm font-bold text-foreground pl-1">{s.from}</span>
+                    <span className="text-xs text-muted-foreground px-1">pays</span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground shrink-0" />
+                    <span className="text-sm font-bold text-foreground pl-1">{s.to}</span>
+                    <div className="ml-auto flex items-center gap-2.5">
+                      <span className="text-sm font-extrabold text-foreground bg-secondary/80 px-2.5 py-1 rounded-lg tabular-nums border border-border">
+                        {money(s.amount, cur)}
+                      </span>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-7 px-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer flex items-center gap-1 rounded-lg animate-fadeIn"
+                        onClick={() => handleSettle(s)}
+                      >
+                        <Check className="h-3.5 w-3.5" /> Settle
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="lg:col-span-2 glow-card flex flex-col justify-between">
+          <div>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2"><Receipt className="h-5 w-5 text-primary" /> Recent Settlements</CardTitle>
+              <p className="text-sm text-muted-foreground">
+                Log of recorded debt payments.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+              {settlements.length === 0 ? (
+                <div className="text-center py-10 text-xs text-muted-foreground border border-dashed border-border rounded-xl">
+                  No settlements recorded yet.
                 </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+              ) : (
+                settlements.map((st) => (
+                  <div key={st.id} className="flex items-center justify-between p-2.5 rounded-lg border border-border/50 bg-muted/10 text-xs transition-all hover:bg-muted/15">
+                    <div>
+                      <div className="font-semibold text-foreground">
+                        {st.from_name} paid {st.to_name}
+                      </div>
+                      <div className="text-[10px] text-muted-foreground mt-0.5">{st.date}</div>
+                    </div>
+                    <div className="flex items-center gap-2.5">
+                      <span className="font-bold font-mono text-pos bg-pos-bg/10 px-2.5 py-0.5 rounded border border-pos/20">
+                        {money(st.amount_display, cur)}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-muted-foreground hover:text-destructive cursor-pointer hover:bg-destructive/10 rounded-md"
+                        onClick={() => handleDeleteSettlement(st.id)}
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </div>
+        </Card>
+      </div>
 
       {/* Infographics row: Categories donut & Spending by month */}
       <div className="grid gap-6 lg:grid-cols-2">
@@ -567,7 +653,7 @@ export default function Balances({ groupId, group }) {
         <Card className="glow-card">
           <CardHeader className="pb-1">
             <CardTitle className="flex items-center gap-2"><Tag className="h-5 w-5 text-primary" /> Categorized Spending</CardTitle>
-            <p className="text-sm text-muted-foreground">Group expenses classified dynamically by description.</p>
+            <p className="text-sm text-muted-foreground">Group expenses classified by categories.</p>
           </CardHeader>
           <CardContent className="flex flex-col sm:flex-row items-center justify-around gap-6 py-6">
             <div className="relative w-[130px] h-[130px] flex items-center justify-center shrink-0">
@@ -587,8 +673,7 @@ export default function Balances({ groupId, group }) {
                         stroke={seg.color}
                         strokeWidth="12"
                         strokeDasharray={`${seg.strokeLength} 314.159`}
-                        strokeDashoffset={seg.strokeOffset}
-                        transform="rotate(-90 60 60)"
+                        transform={`rotate(${seg.rotateAngle} 60 60)`}
                         className="cursor-pointer transition-all duration-300 hover:stroke-[15px]"
                         onMouseEnter={() => setHoveredCategory(seg)}
                         onMouseLeave={() => setHoveredCategory(null)}
@@ -639,7 +724,7 @@ export default function Balances({ groupId, group }) {
         <Card className="glow-card">
           <CardHeader>
             <CardTitle className="flex items-center gap-2"><CalendarDays className="h-5 w-5 text-primary" /> Spending Over Time</CardTitle>
-            <p className="text-sm text-muted-foreground">Total group spending aggregated by month.</p>
+            <p className="text-sm text-muted-foreground">Monthly breakdown of group spending.</p>
           </CardHeader>
           <CardContent className="pb-6">
             <ColumnChart data={stats.by_month} currency={cur} />
@@ -659,7 +744,7 @@ export default function Balances({ groupId, group }) {
             </span>
           </div>
           <p className="text-sm text-muted-foreground">
-            Visualizing when each person was an active member. Expenses only apply to members during their window.
+            Visualizing member active date ranges.
           </p>
         </CardHeader>
         <CardContent className="pt-4">
@@ -709,17 +794,14 @@ export default function Balances({ groupId, group }) {
                       <span className="truncate">{m.name}</span>
                       {m.is_guest && <span className="text-[8px] text-muted-foreground border border-border px-1 rounded-sm uppercase font-normal shrink-0">guest</span>}
                     </span>
-                    <div className="col-span-4 relative h-6 bg-muted/20 rounded-md flex items-center">
-                      {/* Dotted background for inactive */}
-                      <div className="absolute inset-0 border-t border-dashed border-border/60 top-1/2" />
-                      
-                      {/* Colored bar for active window */}
-                      <div
-                        className="absolute h-3 rounded-full bg-primary flex items-center justify-between px-1.5 transition-all duration-300"
-                        style={{ left: `${startPct}%`, width: `${endPct - startPct}%` }}
-                      >
-                        {j && startPct > 0 && <span className="text-[7px] font-black text-primary-foreground">IN</span>}
-                        {l && endPct < 100 && <span className="text-[7px] font-black text-primary-foreground">OUT</span>}
+                    <div className="col-span-4 relative h-6 flex items-center">
+                      {/* Track container */}
+                      <div className="w-full h-2 bg-muted rounded-sm relative">
+                        {/* Colored bar for active window */}
+                        <div
+                          className="absolute h-full bg-muted-foreground rounded-sm transition-all duration-300"
+                          style={{ left: `${startPct}%`, width: `${endPct - startPct}%` }}
+                        />
                       </div>
 
                       {/* Labels */}

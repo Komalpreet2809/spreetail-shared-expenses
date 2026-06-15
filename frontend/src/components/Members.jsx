@@ -75,7 +75,7 @@ export default function Members({ group, onChange }) {
               <Users className="h-5 w-5" /> Members Directory
             </CardTitle>
             <p className="text-xs text-muted-foreground mt-0.5">
-              Membership windows are time-bound. Expenses dated outside a member's active period do not apply to them.
+              Active periods determine expense sharing windows.
             </p>
           </div>
           
@@ -184,12 +184,7 @@ export default function Members({ group, onChange }) {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                         <Initial name={m.name} size={36} />
-                        <div>
-                          <h4 className="font-extrabold text-sm text-foreground">{m.name}</h4>
-                          <span className="text-[10px] text-muted-foreground uppercase tracking-wider block mt-0.5">
-                            {m.is_guest ? "Temporary Guest" : "Standard Member"}
-                          </span>
-                        </div>
+                        <h4 className="font-extrabold text-sm text-foreground">{m.name}</h4>
                       </div>
                       <Badge variant={m.is_guest ? "secondary" : "default"} className="text-[9px] uppercase px-1.5 py-0.2">
                         {m.is_guest ? "guest" : "member"}
@@ -220,10 +215,7 @@ export default function Members({ group, onChange }) {
 
                   <div>
                     {/* Actions row */}
-                    <div className="mt-4 flex items-center justify-between gap-2 border-t border-border/30 pt-3">
-                      <span className="text-[9px] text-muted-foreground font-mono">
-                        {hasDates ? "Custom period active" : "Full group membership"}
-                      </span>
+                    <div className="mt-4 flex justify-end gap-2 border-t border-border/30 pt-3">
                       <Button 
                         variant="ghost" 
                         size="sm" 

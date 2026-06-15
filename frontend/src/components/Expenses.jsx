@@ -17,12 +17,19 @@ import {
 } from "@/components/ui/select";
 import {
   Plus, Trash2, Camera, ScanLine, AlertCircle, CheckCircle2,
-  Utensils, Zap, Car, Tag
+  Utensils, Zap, Car, Tag, Search, X
 } from "lucide-react";
 
 export default function Expenses({ group, onChange }) {
   const [expenses, setExpenses] = useState([]);
   const [open, setOpen] = useState(false);
+
+  // Filter and sorting state
+  const [search, setSearch] = useState("");
+  const [payer, setPayer] = useState("all");
+  const [tag, setTag] = useState("all");
+  const [sortKey, setSortKey] = useState("date");
+  const [sortOrder, setSortOrder] = useState("desc");
 
   async function load() {
     const { data } = await api.get(`/expenses/?group=${group.id}`);
@@ -51,12 +58,62 @@ export default function Expenses({ group, onChange }) {
     return <Tag className="h-4 w-4 text-cat-others" />;
   }
 
+  // Apply filtering
+  const filteredExpenses = expenses.filter((e) => {
+    // 1. Search Query
+    const matchSearch =
+      e.description.toLowerCase().includes(search.toLowerCase()) ||
+      (e.notes || "").toLowerCase().includes(search.toLowerCase());
+
+    // 2. Payer
+    const matchPayer = payer === "all" || String(e.paid_by) === payer;
+
+    // 3. Tag Pills
+    let matchTag = true;
+    if (tag === "grocery") {
+      const d = e.description.toLowerCase();
+      matchTag = d.includes("groceries") || d.includes("dmart") || d.includes("bigbasket") || d.includes("food") || d.includes("supermarket") || d.includes("grocer");
+    } else if (tag === "electricity") {
+      const d = e.description.toLowerCase();
+      matchTag = d.includes("electricity") || d.includes("power") || d.includes("utility");
+    } else if (tag === "rent") {
+      const d = e.description.toLowerCase();
+      matchTag = d.includes("rent") || d.includes("deposit");
+    } else if (tag === "trip") {
+      const d = e.description.toLowerCase();
+      matchTag = d.includes("trip") || d.includes("travel") || d.includes("flight") || d.includes("goa") || d.includes("cab") || d.includes("taxi") || d.includes("uber") || d.includes("scooter") || d.includes("rental") || d.includes("parasailing");
+    } else if (tag === "snacks") {
+      const d = e.description.toLowerCase();
+      matchTag = d.includes("snacks") || d.includes("drinks") || d.includes("pizza") || d.includes("dinner") || d.includes("brunch") || d.includes("lunch") || d.includes("farewell") || d.includes("cake");
+    }
+
+    return matchSearch && matchPayer && matchTag;
+  });
+
+  // Apply sorting
+  const sortedExpenses = [...filteredExpenses].sort((a, b) => {
+    let valA = a[sortKey === "date" ? "date" : "amount_base"];
+    let valB = b[sortKey === "date" ? "date" : "amount_base"];
+
+    if (sortKey === "date") {
+      return sortOrder === "asc" ? valA.localeCompare(valB) : valB.localeCompare(valA);
+    } else {
+      const numA = Number(valA || 0);
+      const numB = Number(valB || 0);
+      return sortOrder === "asc" ? numA - numB : numB - numA;
+    }
+  });
+
+  const countDisplay = sortedExpenses.length === expenses.length
+    ? `${expenses.length}`
+    : `${sortedExpenses.length}/${expenses.length}`;
+
   return (
     <Card className="glow-card">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-border mb-4">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3 border-b border-border">
         <div>
-          <CardTitle>Expenses ({expenses.length})</CardTitle>
-          <p className="text-xs text-muted-foreground mt-0.5">List of all manually entered and CSV-imported expenses.</p>
+          <CardTitle>Expenses ({countDisplay})</CardTitle>
+          <p className="text-xs text-muted-foreground mt-0.5">Manually entered and imported group expenses.</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -70,28 +127,179 @@ export default function Expenses({ group, onChange }) {
           </DialogContent>
         </Dialog>
       </CardHeader>
+
       <CardContent className="p-0">
+        {/* Filters and Sorting Control Bar */}
+        <div className="px-6 py-4 flex flex-col gap-4 border-b border-border/80 bg-muted/5">
+          <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
+            {/* Search input */}
+            <div className="relative w-full sm:max-w-xs">
+              <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-muted-foreground">
+                <Search className="h-4 w-4" />
+              </span>
+              <Input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search description/notes..."
+                className="pl-9 pr-8 h-9 text-xs"
+              />
+              {search && (
+                <button
+                  onClick={() => setSearch("")}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Select Dropdowns */}
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                <span>Payer:</span>
+                <Select value={payer} onValueChange={setPayer}>
+                  <SelectTrigger className="h-9 w-[130px] text-xs">
+                    <SelectValue placeholder="All Members" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all" className="text-xs">All Members</SelectItem>
+                    {group.members.map((m) => (
+                      <SelectItem key={m.id} value={String(m.id)} className="text-xs">
+                        {m.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                <span>Sort by:</span>
+                <Select value={`${sortKey}-${sortOrder}`} onValueChange={(v) => {
+                  const [key, order] = v.split("-");
+                  setSortKey(key);
+                  setSortOrder(order);
+                }}>
+                  <SelectTrigger className="h-9 w-[155px] text-xs">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="date-desc" className="text-xs">Date: Newest First</SelectItem>
+                    <SelectItem value="date-asc" className="text-xs">Date: Oldest First</SelectItem>
+                    <SelectItem value="amount-desc" className="text-xs">Amount: High to Low</SelectItem>
+                    <SelectItem value="amount-asc" className="text-xs">Amount: Low to High</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Keyword Pills (Monochrome Style) */}
+          <div className="flex flex-wrap items-center gap-2 text-xs border-t border-border/10 pt-3">
+            <span className="text-muted-foreground font-semibold">Quick Tags:</span>
+            {[
+              { id: "all", label: "All" },
+              { id: "grocery", label: "Grocery" },
+              { id: "electricity", label: "Electricity" },
+              { id: "rent", label: "Rent" },
+              { id: "trip", label: "Trip/Travel" },
+              { id: "snacks", label: "Snacks/Drinks" }
+            ].map((pill) => {
+              const isActive = tag === pill.id;
+              return (
+                <button
+                  key={pill.id}
+                  type="button"
+                  onClick={() => setTag(pill.id)}
+                  className={`px-3 py-1 rounded-full border text-[11px] font-semibold transition-all cursor-pointer ${
+                    isActive
+                      ? "bg-foreground text-background border-transparent scale-102 shadow-sm font-bold"
+                      : "border-border text-muted-foreground hover:text-foreground hover:bg-muted bg-transparent"
+                  }`}
+                >
+                  {pill.label}
+                </button>
+              );
+            })}
+
+            {(search || payer !== "all" || tag !== "all") && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearch("");
+                  setPayer("all");
+                  setTag("all");
+                }}
+                className="text-xs text-muted-foreground hover:text-foreground font-semibold underline underline-offset-2 ml-auto cursor-pointer"
+              >
+                Clear filters
+              </button>
+            )}
+          </div>
+        </div>
+
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-24">Date</TableHead>
+                <TableHead
+                  className="w-28 cursor-pointer hover:bg-muted/40 transition-colors select-none"
+                  onClick={() => {
+                    if (sortKey === "date") {
+                      setSortOrder(o => o === "asc" ? "desc" : "asc");
+                    } else {
+                      setSortKey("date");
+                      setSortOrder("desc");
+                    }
+                  }}
+                >
+                  <span className="flex items-center gap-1">
+                    Date {sortKey === "date" && (sortOrder === "asc" ? "▲" : "▼")}
+                  </span>
+                </TableHead>
                 <TableHead>Description</TableHead>
                 <TableHead>Paid by</TableHead>
                 <TableHead>Split Type</TableHead>
-                <TableHead className="text-right">Amount (Base)</TableHead>
+                <TableHead
+                  className="text-right cursor-pointer hover:bg-muted/40 transition-colors select-none w-40"
+                  onClick={() => {
+                    if (sortKey === "amount") {
+                      setSortOrder(o => o === "asc" ? "desc" : "asc");
+                    } else {
+                      setSortKey("amount");
+                      setSortOrder("desc");
+                    }
+                  }}
+                >
+                  <span className="flex items-center justify-end gap-1">
+                    Amount (Base) {sortKey === "amount" && (sortOrder === "asc" ? "▲" : "▼")}
+                  </span>
+                </TableHead>
                 <TableHead className="w-12"></TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {expenses.length === 0 ? (
+              {sortedExpenses.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground text-sm">
-                    No expenses logged yet. Click "Add expense" or go to the "Import" tab to upload a CSV.
+                  <TableCell colSpan={6} className="text-center py-12 text-muted-foreground text-sm">
+                    No matching expenses found.
+                    {(search || payer !== "all" || tag !== "all") && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSearch("");
+                          setPayer("all");
+                          setTag("all");
+                        }}
+                        className="block mx-auto mt-2 text-xs font-semibold text-foreground underline"
+                      >
+                        Reset all filters
+                      </button>
+                    )}
                   </TableCell>
                 </TableRow>
               ) : (
-                expenses.map((e) => (
+                sortedExpenses.map((e) => (
                   <TableRow key={e.id} className="hover:bg-muted/30 transition-colors">
                     <TableCell className="whitespace-nowrap font-mono text-xs text-muted-foreground">{e.date}</TableCell>
                     <TableCell>

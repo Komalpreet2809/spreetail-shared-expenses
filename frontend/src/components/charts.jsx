@@ -85,17 +85,17 @@ export function ColumnChart({ data, currency }) {
   return (
     <div className="flex items-stretch gap-3 pt-2" style={{ height: 220 }}>
       {data.map((d) => (
-        <div key={d.key} className="flex h-full flex-1 flex-col items-center gap-2">
-          <div className="text-xs font-semibold tabular-nums text-muted-foreground">
+        <div key={d.key} className="flex h-full flex-1 flex-col items-center gap-2 group cursor-pointer">
+          <div className="text-xs font-semibold tabular-nums text-muted-foreground transition-colors group-hover:text-foreground">
             {money(d.amount, currency)}
           </div>
           <div className="flex w-full min-h-0 flex-1 items-end justify-center">
             <div
-              className="w-full max-w-[56px] rounded-t-md bg-gradient-to-t from-muted-foreground/30 to-foreground transition-all"
+              className="w-full max-w-[56px] rounded-t-md bg-gradient-to-t from-muted-foreground/30 to-foreground transition-all duration-300 group-hover:scale-x-105 group-hover:from-muted-foreground/50 group-hover:to-foreground shadow-sm"
               style={{ height: `${Math.max((d.amount_minor / max) * 100, 1)}%` }}
             />
           </div>
-          <div className="text-xs text-muted-foreground">{d.label}</div>
+          <div className="text-xs text-muted-foreground transition-colors group-hover:text-foreground font-medium">{d.label}</div>
         </div>
       ))}
     </div>
@@ -121,7 +121,7 @@ export function NetBar({ name, netMinor, netLabel, maxAbs, currency, open, onCli
         <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-border" />
         {!settled && (
           <div
-            className={`absolute top-1/2 h-4 -translate-y-1/2 rounded-sm ${owes ? "bg-neg" : "bg-foreground"}`}
+            className={`absolute top-1/2 h-4 -translate-y-1/2 rounded-sm ${owes ? "bg-neg" : "bg-pos"}`}
             style={owes ? { right: "50%", width: `${pct}%` } : { left: "50%", width: `${pct}%` }}
           />
         )}

@@ -198,7 +198,8 @@ def group_balances(group) -> dict:
         for mid, amt in sorted(net.items(), key=lambda x: x[1])
     ]
     settle_up = [
-        {"from": members[t["from_id"]].name, "to": members[t["to_id"]].name,
+        {"from": members[t["from_id"]].name, "from_id": t["from_id"],
+         "to": members[t["to_id"]].name, "to_id": t["to_id"],
          "amount_minor": t["amount_minor"], "amount": to_major_str(t["amount_minor"])}
         for t in simplify_debts(net)
     ]
