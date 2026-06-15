@@ -142,7 +142,7 @@ export default function Expenses({ group, onChange }) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search description/notes..."
-                className="pl-9 pr-8 h-9 text-xs"
+                className="pl-9 pr-8 h-9"
               />
               {search && (
                 <button
