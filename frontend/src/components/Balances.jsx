@@ -39,8 +39,8 @@ export default function Balances({ groupId, group }) {
       group.members.forEach((m, idx) => {
         const angle = (2 * Math.PI * idx) / N - Math.PI / 2;
         initial[m.id] = {
-          x: 200 + 115 * Math.cos(angle),
-          y: 200 + 115 * Math.sin(angle)
+          x: 200 + 140 * Math.cos(angle),
+          y: 200 + 140 * Math.sin(angle)
         };
       });
       setNodePositions(initial);
@@ -192,8 +192,8 @@ export default function Balances({ groupId, group }) {
     return {
       id: m.id,
       name: m.name,
-      x: 200 + 115 * Math.cos(angle),
-      y: 200 + 115 * Math.sin(angle),
+      x: 200 + 140 * Math.cos(angle),
+      y: 200 + 140 * Math.sin(angle),
     };
   });
 
