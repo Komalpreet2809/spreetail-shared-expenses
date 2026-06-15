@@ -16,7 +16,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  Plus, Trash2, Camera, ScanLine, Sparkles, AlertCircle, CheckCircle2,
+  Plus, Trash2, Camera, ScanLine, AlertCircle, CheckCircle2,
   Utensils, Zap, Car, Tag
 } from "lucide-react";
 
@@ -64,7 +64,7 @@ export default function Expenses({ group, onChange }) {
           </DialogTrigger>
           <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-xl">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-1.5"><Sparkles className="h-5 w-5 text-primary" /> Add expense</DialogTitle>
+              <DialogTitle className="flex items-center gap-1.5"><Plus className="h-5 w-5 text-primary" /> Add expense</DialogTitle>
             </DialogHeader>
             <AddExpense group={group} onAdded={() => { setOpen(false); load(); onChange?.(); }} />
           </DialogContent>

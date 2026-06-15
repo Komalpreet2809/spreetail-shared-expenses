@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
-  ChevronDown, LogOut, Plus, LayoutDashboard, Receipt, Users, Upload, Sparkles, Sun, Moon,
+  ChevronDown, LogOut, Plus, LayoutDashboard, Receipt, Users, Upload, Bot, Sun, Moon,
 } from "lucide-react";
 
 const TABS = [
@@ -22,7 +22,7 @@ const TABS = [
   { label: "Expenses", icon: Receipt },
   { label: "Members", icon: Users },
   { label: "Import", icon: Upload },
-  { label: "Ask AI", icon: Sparkles },
+  { label: "Ask AI", icon: Bot },
 ];
 
 export default function Dashboard() {

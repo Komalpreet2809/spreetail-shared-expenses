@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
-  Sparkles, Send, Trash2, HelpCircle, TrendingDown, Scale, Clipboard, Check,
+  Bot, Send, Trash2, HelpCircle, TrendingDown, Scale, Clipboard, Check,
   Database, Info, ShieldCheck, MessageSquare, ListFilter, Cpu
 } from "lucide-react";
 
@@ -163,7 +163,7 @@ export default function Ask({ groupId }) {
             </div>
             <div>
               <CardTitle className="text-base flex items-center gap-1.5">
-                AI Copilot <Sparkles className="h-4 w-4 text-muted-foreground animate-pulse" />
+                AI Copilot <Bot className="h-4 w-4 text-muted-foreground animate-pulse" />
               </CardTitle>
               <p className="text-[10px] text-muted-foreground">Deterministic financial audit queries</p>
             </div>
@@ -230,7 +230,7 @@ export default function Ask({ groupId }) {
           {busy && (
             <div className="flex flex-col items-start mr-auto">
               <div className="flex items-center gap-2.5 bg-muted/20 border border-border/40 rounded-2xl rounded-tl-sm px-4 py-3">
-                <Sparkles className="h-4 w-4 animate-spin text-muted-foreground" />
+                <Bot className="h-4 w-4 animate-bounce text-muted-foreground" />
                 <span className="text-xs text-muted-foreground font-medium animate-pulse">Copilot is querying the engine...</span>
               </div>
             </div>
