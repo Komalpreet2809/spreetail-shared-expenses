@@ -661,15 +661,18 @@ export default function Balances({ groupId, group }) {
         <CardContent className="pt-4">
           <div className="border border-border rounded-xl p-4 bg-muted/10 space-y-4">
             {/* Header / Month markers */}
-            <div className="grid grid-cols-4 text-xs font-semibold text-muted-foreground text-center border-b border-border pb-1.5">
-              <div>Feb 2026</div>
-              <div>Mar 2026</div>
-              <div>Apr 2026</div>
-              <div>May 2026</div>
+            <div className="grid grid-cols-5 items-center gap-4 text-xs font-bold text-foreground/80 border-b border-border pb-2">
+              <span className="col-span-1 pl-1">Member</span>
+              <div className="col-span-4 grid grid-cols-4 text-center">
+                <div>Feb 2026</div>
+                <div>Mar 2026</div>
+                <div>Apr 2026</div>
+                <div>May 2026</div>
+              </div>
             </div>
 
             {/* Timeline rows */}
-            <div className="space-y-3 pt-2">
+            <div className="space-y-1 pt-1">
               {group.members.map((m) => {
                 const j = m.joined_on;
                 const l = m.left_on;
@@ -696,12 +699,12 @@ export default function Balances({ groupId, group }) {
                 }
 
                 return (
-                  <div key={m.id} className="grid grid-cols-5 items-center gap-4">
+                  <div key={m.id} className="grid grid-cols-5 items-center gap-4 pb-5 border-b border-border/10 last:border-b-0 last:pb-2 pt-2">
                     <span className="text-xs font-semibold col-span-1 truncate flex items-center gap-1.5">
                       <Initial name={m.name} size={18} /> {m.name}
                       {m.is_guest && <span className="text-[8px] text-muted-foreground border border-border px-1 rounded-sm uppercase">guest</span>}
                     </span>
-                    <div className="col-span-4 relative h-6 bg-muted/20 rounded-md overflow-hidden flex items-center">
+                    <div className="col-span-4 relative h-6 bg-muted/20 rounded-md flex items-center">
                       {/* Dotted background for inactive */}
                       <div className="absolute inset-0 border-t border-dashed border-border/60 top-1/2" />
                       
@@ -715,8 +718,22 @@ export default function Balances({ groupId, group }) {
                       </div>
 
                       {/* Labels */}
-                      {j && <div className="absolute text-[8px] font-semibold text-muted-foreground" style={{ left: `${startPct}%`, top: "14px" }}>joined {j.slice(5)}</div>}
-                      {l && <div className="absolute text-[8px] font-semibold text-muted-foreground" style={{ left: `${endPct - 10}%`, top: "14px" }}>left {l.slice(5)}</div>}
+                      {j && (
+                        <div
+                          className="absolute text-[9px] font-bold text-foreground/90 whitespace-nowrap"
+                          style={{ left: `${startPct}%`, top: "20px", transform: "translateX(-10%)" }}
+                        >
+                          joined {j.slice(5)}
+                        </div>
+                      )}
+                      {l && (
+                        <div
+                          className="absolute text-[9px] font-bold text-foreground/90 whitespace-nowrap"
+                          style={{ left: `${endPct}%`, top: "20px", transform: "translateX(-90%)" }}
+                        >
+                          left {l.slice(5)}
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
