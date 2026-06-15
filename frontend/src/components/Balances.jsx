@@ -503,11 +503,10 @@ export default function Balances({ groupId, group }) {
                   onClick={() => openDrill(b)}
                   className="flex w-full items-center justify-between rounded-xl px-3 py-3 text-left transition-all duration-200 hover:bg-muted border border-transparent hover:border-border cursor-pointer"
                 >
-                  <div className="flex items-center gap-3">
-                    <Initial name={b.name} size={28} />
+                  <div className="flex items-center gap-2">
                     <div>
                       <span className="text-sm font-semibold block">{b.name}</span>
-                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider block">
+                      <span className="text-[10px] text-muted-foreground uppercase tracking-wider block mt-0.5">
                         {isSettled ? "Settled" : isOwed ? "Creditor" : "Debtor"}
                       </span>
                     </div>
@@ -666,8 +665,8 @@ export default function Balances({ groupId, group }) {
         <CardContent className="pt-4">
           <div className="border border-border rounded-xl p-4 bg-muted/10 space-y-4">
             {/* Header / Month markers */}
-            <div className="grid grid-cols-5 items-center gap-4 text-xs font-bold text-foreground/80 border-b border-border pb-2">
-              <span className="col-span-1 pl-1">Member</span>
+            <div className="grid grid-cols-6 items-center gap-4 text-xs font-bold text-foreground/80 border-b border-border pb-2">
+              <span className="col-span-2 pl-1">Member</span>
               <div className="col-span-4 grid grid-cols-4 text-center">
                 <div>Feb 2026</div>
                 <div>Mar 2026</div>
@@ -704,10 +703,11 @@ export default function Balances({ groupId, group }) {
                 }
 
                 return (
-                  <div key={m.id} className="grid grid-cols-5 items-center gap-4 pb-5 border-b border-border/10 last:border-b-0 last:pb-2 pt-2">
-                    <span className="text-xs font-bold col-span-1 truncate flex items-center gap-1.5 pl-1 text-foreground">
-                      {m.name}
-                      {m.is_guest && <span className="text-[8px] text-muted-foreground border border-border px-1 rounded-sm uppercase font-normal">guest</span>}
+                  <div key={m.id} className="grid grid-cols-6 items-center gap-4 pb-5 border-b border-border/10 last:border-b-0 last:pb-2 pt-2">
+                    <span className="text-xs font-bold col-span-2 truncate flex items-center gap-2 pl-1 text-foreground">
+                      <Initial name={m.name} size={22} />
+                      <span className="truncate">{m.name}</span>
+                      {m.is_guest && <span className="text-[8px] text-muted-foreground border border-border px-1 rounded-sm uppercase font-normal shrink-0">guest</span>}
                     </span>
                     <div className="col-span-4 relative h-6 bg-muted/20 rounded-md flex items-center">
                       {/* Dotted background for inactive */}
