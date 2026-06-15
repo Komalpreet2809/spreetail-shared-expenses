@@ -32,10 +32,10 @@
   --neg-bg: oklch(0.96 0.03 29);
 
   /* Premium category colors */
-  --cat-food: oklch(0.76 0.15 50);
-  --cat-bills: oklch(0.62 0.17 235);
-  --cat-travel: oklch(0.64 0.18 295);
-  --cat-others: oklch(0.70 0.14 185);
+  --cat-food: oklch(0.74 0.15 25);
+  --cat-bills: oklch(0.74 0.15 235);
+  --cat-travel: oklch(0.74 0.15 285);
+  --cat-others: oklch(0.74 0.15 150);
 }
 
 .dark {
@@ -66,10 +66,10 @@
   --neg-bg: oklch(0.18 0.04 29);
 
   /* Dark mode premium category colors */
-  --cat-food: oklch(0.80 0.12 50);
-  --cat-bills: oklch(0.72 0.11 235);
-  --cat-travel: oklch(0.74 0.13 295);
-  --cat-others: oklch(0.77 0.10 185);
+  --cat-food: oklch(0.78 0.14 25);
+  --cat-bills: oklch(0.78 0.12 235);
+  --cat-travel: oklch(0.78 0.12 285);
+  --cat-others: oklch(0.78 0.12 150);
 }
 
 @theme inline {
