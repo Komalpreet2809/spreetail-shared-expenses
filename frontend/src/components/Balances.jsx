@@ -304,7 +304,7 @@ export default function Balances({ groupId, group }) {
               </p>
             </div>
             {/* Zoom Controls inside Card Header */}
-            <div className="flex items-center gap-1 bg-muted/40 border border-border p-1 rounded-xl shadow-xs shrink-0">
+            <div className="flex items-center gap-0.5 shrink-0">
               <Button
                 variant="ghost"
                 size="icon"
