@@ -23,6 +23,17 @@ export default function Balances({ groupId, group }) {
   const [openMember, setOpenMember] = useState(null);
   const [detail, setDetail] = useState(null);
   
+  // Responsive screen size detection
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
+  useEffect(() => {
+    const checkSize = () => {
+      setIsSmallScreen(window.innerWidth < 1024);
+    };
+    checkSize();
+    window.addEventListener("resize", checkSize);
+    return () => window.removeEventListener("resize", checkSize);
+  }, []);
+
   // Interactive hover states
   const [hoveredNode, setHoveredNode] = useState(null);
   const [hoveredCategory, setHoveredCategory] = useState(null);
@@ -33,27 +44,33 @@ export default function Balances({ groupId, group }) {
   const [hasDragged, setHasDragged] = useState(false);
   const [selectedNode, setSelectedNode] = useState(null);
 
+  // Set visual map default zoom level to prevent clipping on mobile
+  useEffect(() => {
+    setZoom(isSmallScreen ? 0.95 : 1.25);
+  }, [isSmallScreen]);
+
   useEffect(() => {
     if (group && group.members) {
       const N = group.members.length;
       const initial = {};
+      const radius = isSmallScreen ? 110 : 140;
       group.members.forEach((m, idx) => {
         const angle = (2 * Math.PI * idx) / N - Math.PI / 2;
         initial[m.id] = {
-          x: 200 + 140 * Math.cos(angle),
-          y: 200 + 140 * Math.sin(angle)
+          x: 200 + radius * Math.cos(angle),
+          y: 200 + radius * Math.sin(angle)
         };
       });
       setNodePositions(initial);
     }
-  }, [group]);
+  }, [group, isSmallScreen]);
 
   useEffect(() => {
     setNodePositions({});
   }, [groupId]);
 
   const handleMouseMove = (e) => {
-    if (draggedNode === null) return;
+    if (isSmallScreen || draggedNode === null) return;
     
     if (dragStart) {
       const dist = Math.sqrt(Math.pow(e.clientX - dragStart.x, 2) + Math.pow(e.clientY - dragStart.y, 2));
@@ -83,7 +100,7 @@ export default function Balances({ groupId, group }) {
   };
 
   const handleTouchMove = (e) => {
-    if (draggedNode === null) return;
+    if (isSmallScreen || draggedNode === null) return;
     if (e.touches.length === 0) return;
     const touch = e.touches[0];
 
@@ -119,7 +136,7 @@ export default function Balances({ groupId, group }) {
   };
 
   const handleReset = () => {
-    setZoom(1.25);
+    setZoom(isSmallScreen ? 0.95 : 1.25);
     setNodePositions({});
     setSelectedNode(null);
   };
@@ -216,6 +233,7 @@ export default function Balances({ groupId, group }) {
 
   // --- Network Graph Nodes and Edges calculation ---
   const N = group.members.length;
+  const radius = isSmallScreen ? 110 : 140;
   const graphNodes = group.members.map((m, idx) => {
     if (nodePositions[m.id]) {
       return { id: m.id, name: m.name, x: nodePositions[m.id].x, y: nodePositions[m.id].y };
@@ -224,8 +242,8 @@ export default function Balances({ groupId, group }) {
     return {
       id: m.id,
       name: m.name,
-      x: 200 + 140 * Math.cos(angle),
-      y: 200 + 140 * Math.sin(angle),
+      x: 200 + radius * Math.cos(angle),
+      y: 200 + radius * Math.sin(angle),
     };
   });
 
@@ -289,7 +307,7 @@ export default function Balances({ groupId, group }) {
               <svg
                 viewBox="0 0 400 400"
                 className={`w-full h-auto overflow-visible select-none ${
-                  draggedNode !== null ? "cursor-grabbing" : "cursor-grab"
+                  isSmallScreen ? "cursor-default" : (draggedNode !== null ? "cursor-grabbing" : "cursor-grab")
                 }`}
                 onClick={() => setSelectedNode(null)}
                 onMouseMove={handleMouseMove}
@@ -402,11 +420,12 @@ export default function Balances({ groupId, group }) {
                   return (
                     <g
                       key={n.id}
-                      className="cursor-grab active:cursor-grabbing transition-all duration-150"
+                      className={isSmallScreen ? "transition-all duration-150" : "cursor-grab active:cursor-grabbing transition-all duration-150"}
                       style={{ opacity, transformOrigin: `${n.x}px ${n.y}px`, transform: `scale(${scale})` }}
                       onMouseEnter={() => setHoveredNode(n.id)}
                       onMouseLeave={() => setHoveredNode(null)}
                       onMouseDown={(e) => {
+                        if (isSmallScreen) return;
                         e.stopPropagation();
                         e.preventDefault();
                         setDragStart({ x: e.clientX, y: e.clientY });
@@ -414,6 +433,7 @@ export default function Balances({ groupId, group }) {
                         setDraggedNode(n.id);
                       }}
                       onTouchStart={(e) => {
+                        if (isSmallScreen) return;
                         e.stopPropagation();
                         if (e.touches.length > 0) {
                           setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
@@ -423,7 +443,7 @@ export default function Balances({ groupId, group }) {
                       }}
                       onClick={(e) => {
                         e.stopPropagation();
-                        if (hasDragged) return;
+                        if (!isSmallScreen && hasDragged) return;
                         setSelectedNode(prev => prev === n.id ? null : n.id);
                       }}
                     >
@@ -439,8 +459,8 @@ export default function Balances({ groupId, group }) {
                         clipPath={`url(#clip-${n.id})`}
                       />
                       <circle cx={n.x} cy={n.y} r="18" fill="none" stroke={strokeColor} strokeWidth={strokeWidth} className="shadow-sm" />
-                      <rect x={n.x - 30} y={n.y + 24} width="60" height="15" rx="3" fill="var(--card)" stroke="var(--border)" strokeWidth="0.5" />
-                      <text textAnchor="middle" x={n.x} y={n.y + 34} fontSize="9" fontWeight="500" className="fill-muted-foreground font-sans">
+                      <rect x={n.x - 32} y={n.y + 24} width="64" height="16" rx="4" fill="var(--card)" stroke="var(--border)" strokeWidth="0.5" />
+                      <text textAnchor="middle" x={n.x} y={n.y + 35} fontSize="10" fontWeight="600" className="fill-muted-foreground font-sans tracking-wide">
                         {n.name}
                       </text>
                     </g>
