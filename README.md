@@ -5,7 +5,7 @@ Spreetail Software Engineering Intern assignment. The hard part — and the focu
 of this project — is **ingesting a deliberately messy CSV**: detecting every data
 problem, surfacing it, and handling it deliberately instead of silently.
 
-- **Live app:** https://broketogther.komalpreet.me
+- **Live app:** https://broketogether.komalpreet.me
 - **Fallback URL:** https://spreetail-shared-expenses-omega.vercel.app
 - **API:** https://spreetail-expenses-api.onrender.com
 - **Demo login:** `demo` / `BrokeTogether2026!`
