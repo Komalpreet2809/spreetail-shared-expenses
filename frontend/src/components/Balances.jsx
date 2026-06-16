@@ -46,24 +46,23 @@ export default function Balances({ groupId, group }) {
 
   // Set visual map default zoom level to prevent clipping on mobile
   useEffect(() => {
-    setZoom(isSmallScreen ? 0.95 : 1.25);
+    setZoom(isSmallScreen ? 1.05 : 1.25);
   }, [isSmallScreen]);
 
   useEffect(() => {
     if (group && group.members) {
       const N = group.members.length;
       const initial = {};
-      const radius = isSmallScreen ? 110 : 140;
       group.members.forEach((m, idx) => {
         const angle = (2 * Math.PI * idx) / N - Math.PI / 2;
         initial[m.id] = {
-          x: 200 + radius * Math.cos(angle),
-          y: 200 + radius * Math.sin(angle)
+          x: 200 + 140 * Math.cos(angle),
+          y: 200 + 140 * Math.sin(angle)
         };
       });
       setNodePositions(initial);
     }
-  }, [group, isSmallScreen]);
+  }, [group]);
 
   useEffect(() => {
     setNodePositions({});
@@ -136,7 +135,7 @@ export default function Balances({ groupId, group }) {
   };
 
   const handleReset = () => {
-    setZoom(isSmallScreen ? 0.95 : 1.25);
+    setZoom(isSmallScreen ? 1.05 : 1.25);
     setNodePositions({});
     setSelectedNode(null);
   };
@@ -233,7 +232,6 @@ export default function Balances({ groupId, group }) {
 
   // --- Network Graph Nodes and Edges calculation ---
   const N = group.members.length;
-  const radius = isSmallScreen ? 110 : 140;
   const graphNodes = group.members.map((m, idx) => {
     if (nodePositions[m.id]) {
       return { id: m.id, name: m.name, x: nodePositions[m.id].x, y: nodePositions[m.id].y };
@@ -242,8 +240,8 @@ export default function Balances({ groupId, group }) {
     return {
       id: m.id,
       name: m.name,
-      x: 200 + radius * Math.cos(angle),
-      y: 200 + radius * Math.sin(angle),
+      x: 200 + 140 * Math.cos(angle),
+      y: 200 + 140 * Math.sin(angle),
     };
   });
 
