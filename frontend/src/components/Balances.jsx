@@ -300,7 +300,7 @@ export default function Balances({ groupId, group }) {
               Interactive network showing who owes whom.
             </p>
           </CardHeader>
-          <CardContent className="relative flex items-center justify-center p-4 min-h-[350px]">
+          <CardContent className="relative flex-1 flex items-center justify-center p-4 min-h-[350px]">
             <div className="relative w-full max-w-[340px]">
               <svg
                 viewBox="0 0 400 400"
