@@ -294,45 +294,13 @@ export default function Balances({ groupId, group }) {
       {/* Visual Debt settlement map */}
       <div className="grid gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3 glow-card overflow-hidden">
-          <CardHeader className="pb-2 flex flex-row items-center justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
-                <Scale className="h-5 w-5 text-primary" /> Visual Settlement Map
-              </CardTitle>
-              <p className="text-xs sm:text-sm text-muted-foreground truncate sm:not-truncate">
-                Interactive network showing who owes whom.
-              </p>
-            </div>
-            {/* Zoom Controls inside Card Header */}
-            <div className="flex items-center gap-0.5 shrink-0">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg hover:bg-muted"
-                onClick={() => setZoom(z => Math.min(z + 0.15, 2.5))}
-                title="Zoom In"
-              >
-                <ZoomIn className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg hover:bg-muted"
-                onClick={() => setZoom(z => Math.max(z - 0.15, 0.5))}
-                title="Zoom Out"
-              >
-                <ZoomOut className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg hover:bg-muted"
-                onClick={handleReset}
-                title="Reset Zoom"
-              >
-                <RotateCcw className="h-4 w-4" />
-              </Button>
-            </div>
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2">
+              <Scale className="h-5 w-5 text-primary" /> Visual Settlement Map
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Interactive network showing who owes whom.
+            </p>
           </CardHeader>
           <CardContent className="relative flex items-center justify-center p-4 min-h-[350px]">
             <div className="relative w-full max-w-[340px]">
@@ -501,9 +469,40 @@ export default function Balances({ groupId, group }) {
                 </g>
               </svg>
   
-              {/* Floating Selection Details */}
+              {/* Floating Zoom Controls (Vertically on Right Wall Top) */}
+              <div className="absolute top-2 right-2 flex flex-col gap-1 z-10">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg hover:bg-muted"
+                  onClick={() => setZoom(z => Math.min(z + 0.15, 2.5))}
+                  title="Zoom In"
+                >
+                  <ZoomIn className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg hover:bg-muted"
+                  onClick={() => setZoom(z => Math.max(z - 0.15, 0.5))}
+                  title="Zoom Out"
+                >
+                  <ZoomOut className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg hover:bg-muted"
+                  onClick={handleReset}
+                  title="Reset Zoom"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Floating Selection Details (on Left Wall Top) */}
               {selectedNode !== null && (
-                <div className="absolute top-2 right-2 flex items-center gap-2 bg-card/90 backdrop-blur border border-border px-3 py-1.5 rounded-xl shadow-md z-10 animate-fadeIn">
+                <div className="absolute top-2 left-2 flex items-center gap-2 bg-card/90 backdrop-blur border border-border px-3 py-1.5 rounded-xl shadow-md z-10 animate-fadeIn">
                   <span className="text-xs font-extrabold text-foreground pl-1">
                     {group.members.find(m => m.id === selectedNode)?.name}
                   </span>
