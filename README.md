@@ -52,9 +52,6 @@ Includes a conversational AI panel to answer questions like "Who owes Aisha mone
 
 ```mermaid
 graph TD
-    classDef default fill:#ffffff,stroke:#bbb,stroke-width:1px,color:#111;
-    classDef highlight fill:#f0f0f0,stroke:#333,stroke-width:2px,color:#111;
-
     A["React Client SPA <br/> Vercel Custom Domain"] -- "HTTP/JSON /api" --> B["Django REST API <br/> Render Web Service"]
     B --> C[("PostgreSQL Database <br/> Render Managed")]
     
