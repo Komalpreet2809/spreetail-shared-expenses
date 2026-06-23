@@ -69,25 +69,7 @@ graph TD
     H -- "Natural Phrasing" --> G
 ```
 
-### Database Schema (ERD)
 
-```mermaid
-erDiagram
-    User ||--o{ Group : "owns"
-    Group ||--|{ Member : "has"
-    Member ||--o{ MemberAlias : "has"
-    Member ||--o{ Expense : "pays"
-    Expense ||--|{ ExpenseSplit : "has"
-    Member ||--o{ ExpenseSplit : "owes"
-    Group ||--o{ Settlement : "tracks"
-    Member ||--o{ Settlement : "sends"
-    Member ||--o{ Settlement : "receives"
-    Group ||--o{ ImportBatch : "imports"
-    ImportBatch ||--o{ StagedRow : "stages"
-    StagedRow ||--o{ Anomaly : "triggers"
-```
-
----
 
 ## Deliverables & Walkthrough Map
 
